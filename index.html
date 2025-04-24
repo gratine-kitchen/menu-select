@@ -104,7 +104,22 @@
             color: #27ae60;
             text-align: right;
         }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+        }
     </style>
+    <!-- Add Papa Parse library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -138,109 +153,97 @@
     </div>
 
     <script>
-        // Menu data
-        const menuData = {
-            soups: [
-                {
-                    id: 's1',
-                    name: 'Cream of Mushroom',
-                    description: 'Rich and creamy mushroom soup with herbs',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 0
-                },
-                {
-                    id: 's2',
-                    name: 'Lobster Bisque',
-                    description: 'Luxurious cream-based soup with lobster',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 5
-                },
-                {
-                    id: 's3',
-                    name: 'French Onion',
-                    description: 'Classic onion soup with melted cheese',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 2
-                }
-            ],
-            starters: [
-                {
-                    id: 'st1',
-                    name: 'Bruschetta',
-                    description: 'Toasted bread with tomatoes and basil',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 0
-                },
-                {
-                    id: 'st2',
-                    name: 'Scallops',
-                    description: 'Pan-seared scallops with butter sauce',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 8
-                },
-                {
-                    id: 'st3',
-                    name: 'Calamari',
-                    description: 'Crispy fried calamari with marinara',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 4
-                }
-            ],
-            mains: [
-                {
-                    id: 'm1',
-                    name: 'Grilled Chicken',
-                    description: 'Herb-marinated grilled chicken breast',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 0
-                },
-                {
-                    id: 'm2',
-                    name: 'Filet Mignon',
-                    description: '8oz premium beef tenderloin',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 15
-                },
-                {
-                    id: 'm3',
-                    name: 'Salmon',
-                    description: 'Fresh Atlantic salmon with lemon butter',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 8
-                }
-            ],
-            desserts: [
-                {
-                    id: 'd1',
-                    name: 'Chocolate Cake',
-                    description: 'Rich chocolate layer cake',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 0
-                },
-                {
-                    id: 'd2',
-                    name: 'Crème Brûlée',
-                    description: 'Classic French vanilla custard',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 3
-                },
-                {
-                    id: 'd3',
-                    name: 'Tiramisu',
-                    description: 'Italian coffee-flavored dessert',
-                    image: 'https://via.placeholder.com/150',
-                    upgradePrice: 2
-                }
-            ]
-        };
+        async function fetchMenuData() {
+            try {
+                const PUBLISHED_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQp_lmQ3G1BBHVC5Lotsbtid6IO9kA83VGmKeI2e_Q31_LXtsFM8v2ZyvloRxo7FMixbu46ofyPq9JF/pub?gid=0&single=true&output=csv';
+                
+                // Create a proxy URL using a CORS proxy service
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(PUBLISHED_CSV_URL);
 
-        // Selected items storage
-        const selectedItems = {
-            soups: null,
-            starters: null,
-            mains: null,
-            desserts: null
-        };
+                return new Promise((resolve, reject) => {
+                    Papa.parse(proxyUrl, {
+                        download: true,
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            console.log('Parsed CSV data:', results.data);
+                            if (results.data && results.data.length > 0) {
+                                resolve(processCSVData(results.data));
+                            } else {
+                                reject(new Error('No data found in CSV'));
+                            }
+                        },
+                        error: function(error) {
+                            console.error('CSV parsing error:', error);
+                            reject(error);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error fetching menu data:', error);
+                document.querySelector('.container').innerHTML += `
+                    <div class="error">Error loading menu data: ${error.message}</div>
+                `;
+                return null;
+            }
+        }
+
+        // Alternative fetch method if Papa Parse fails
+        async function fallbackFetchMenuData() {
+            try {
+                const PUBLISHED_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQp_lmQ3G1BBHVC5Lotsbtid6IO9kA83VGmKeI2e_Q31_LXtsFM8v2ZyvloRxo7FMixbu46ofyPq9JF/pub?gid=0&single=true&output=csv';
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(PUBLISHED_CSV_URL);
+
+                const response = await fetch(proxyUrl);
+                const csvText = await response.text();
+                
+                return new Promise((resolve, reject) => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: function(results) {
+                            console.log('Parsed CSV data (fallback):', results.data);
+                            resolve(processCSVData(results.data));
+                        },
+                        error: function(error) {
+                            reject(error);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Fallback fetch error:', error);
+                throw error;
+            }
+        }
+
+        function processCSVData(csvData) {
+            const menuData = {
+                soups: [],
+                starters: [],
+                mains: [],
+                desserts: []
+            };
+
+            csvData.forEach(row => {
+                // Skip empty rows or rows without required fields
+                if (!row.Category || !row.ID || !row.Name) return;
+
+                const item = {
+                    id: row.ID,
+                    name: row.Name,
+                    description: row.Description || '',
+                    image: row['Image URL'] || 'https://via.placeholder.com/150',
+                    upgradePrice: parseFloat(row['Upgrade Price']) || 0
+                };
+
+                const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
+                if (menuData[categoryKey]) {
+                    menuData[categoryKey].push(item);
+                }
+            });
+
+            return menuData;
+        }
 
         // Function to create menu item elements
         function createMenuItem(item, category) {
@@ -250,7 +253,7 @@
             div.dataset.category = category;
             
             div.innerHTML = `
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/150'">
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
                 ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)}</p>` : ''}
@@ -262,12 +265,9 @@
 
         // Function to select an item
         function selectItem(item, category, element) {
-            // Remove selection from other items in the same category
             document.querySelectorAll(`#${category} .menu-item`).forEach(el => {
                 el.classList.remove('selected');
             });
-
-            // Add selection to clicked item
             element.classList.add('selected');
             selectedItems[category] = item;
             updateSummary();
@@ -290,14 +290,58 @@
             document.getElementById('total-price').textContent = total.toFixed(2);
         }
 
-        // Initialize menu
-        window.addEventListener('DOMContentLoaded', () => {
-            for (const [category, items] of Object.entries(menuData)) {
-                const container = document.getElementById(category);
-                items.forEach(item => {
-                    container.appendChild(createMenuItem(item, category));
+        async function initializeMenu() {
+            try {
+                console.log('Starting menu initialization...');
+                
+                // Show loading state
+                document.querySelectorAll('.menu-items').forEach(el => {
+                    el.innerHTML = '<div class="loading">Loading menu items...</div>';
                 });
+
+                let menuData;
+                try {
+                    menuData = await fetchMenuData();
+                } catch (error) {
+                    console.log('Primary fetch failed, trying fallback...', error);
+                    menuData = await fallbackFetchMenuData();
+                }
+
+                console.log('Menu data received:', menuData);
+
+                if (menuData) {
+                    for (const [category, items] of Object.entries(menuData)) {
+                        const container = document.getElementById(category);
+                        if (container) {
+                            container.innerHTML = '';
+                            console.log(`Processing category ${category} with ${items.length} items`);
+                            
+                            if (items.length === 0) {
+                                container.innerHTML = '<div class="error">No items found for this category</div>';
+                            } else {
+                                items.forEach(item => {
+                                    container.appendChild(createMenuItem(item, category));
+                                });
+                            }
+                        } else {
+                            console.warn(`Container not found for category: ${category}`);
+                        }
+                    }
+                } else {
+                    throw new Error('No menu data returned');
+                }
+            } catch (error) {
+                console.error('Initialization error:', error);
+                document.querySelector('.container').innerHTML += `
+                    <div class="error">Error initializing menu: ${error.message}</div>
+                `;
             }
+        }
+
+        // Start the application
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM Content Loaded, initializing menu...');
+            initializeMenu();
         });
     </script>
 </body>
