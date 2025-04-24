@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Dinner Menu Builder</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .course-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .course-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .menu-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .menu-item.selected {
+            border: 2px solid #27ae60;
+            background-color: #f1f8e9;
+        }
+
+        .menu-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .menu-item h3 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .menu-item p {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .price-upgrade {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .total-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #27ae60;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Build Your Custom Dinner Menu</h1>
+        
+        <div class="course-section">
+            <h2 class="course-title">Soups</h2>
+            <div class="menu-items" id="soups"></div>
+        </div>
+
+        <div class="course-section">
+            <h2 class="course-title">Starters</h2>
+            <div class="menu-items" id="starters"></div>
+        </div>
+
+        <div class="course-section">
+            <h2 class="course-title">Main Courses</h2>
+            <div class="menu-items" id="mains"></div>
+        </div>
+
+        <div class="course-section">
+            <h2 class="course-title">Desserts</h2>
+            <div class="menu-items" id="desserts"></div>
+        </div>
+
+        <div class="summary">
+            <h2>Your Selection</h2>
+            <div id="selected-items"></div>
+            <div class="total-price">Total: $<span id="total-price">0.00</span></div>
+        </div>
+    </div>
+
+    <script>
+        // Menu data
+        const menuData = {
+            soups: [
+                {
+                    id: 's1',
+                    name: 'Cream of Mushroom',
+                    description: 'Rich and creamy mushroom soup with herbs',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 0
+                },
+                {
+                    id: 's2',
+                    name: 'Lobster Bisque',
+                    description: 'Luxurious cream-based soup with lobster',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 5
+                },
+                {
+                    id: 's3',
+                    name: 'French Onion',
+                    description: 'Classic onion soup with melted cheese',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 2
+                }
+            ],
+            starters: [
+                {
+                    id: 'st1',
+                    name: 'Bruschetta',
+                    description: 'Toasted bread with tomatoes and basil',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 0
+                },
+                {
+                    id: 'st2',
+                    name: 'Scallops',
+                    description: 'Pan-seared scallops with butter sauce',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 8
+                },
+                {
+                    id: 'st3',
+                    name: 'Calamari',
+                    description: 'Crispy fried calamari with marinara',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 4
+                }
+            ],
+            mains: [
+                {
+                    id: 'm1',
+                    name: 'Grilled Chicken',
+                    description: 'Herb-marinated grilled chicken breast',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 0
+                },
+                {
+                    id: 'm2',
+                    name: 'Filet Mignon',
+                    description: '8oz premium beef tenderloin',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 15
+                },
+                {
+                    id: 'm3',
+                    name: 'Salmon',
+                    description: 'Fresh Atlantic salmon with lemon butter',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 8
+                }
+            ],
+            desserts: [
+                {
+                    id: 'd1',
+                    name: 'Chocolate Cake',
+                    description: 'Rich chocolate layer cake',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 0
+                },
+                {
+                    id: 'd2',
+                    name: 'Crème Brûlée',
+                    description: 'Classic French vanilla custard',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 3
+                },
+                {
+                    id: 'd3',
+                    name: 'Tiramisu',
+                    description: 'Italian coffee-flavored dessert',
+                    image: 'https://via.placeholder.com/150',
+                    upgradePrice: 2
+                }
+            ]
+        };
+
+        // Selected items storage
+        const selectedItems = {
+            soups: null,
+            starters: null,
+            mains: null,
+            desserts: null
+        };
+
+        // Function to create menu item elements
+        function createMenuItem(item, category) {
+            const div = document.createElement('div');
+            div.className = 'menu-item';
+            div.dataset.id = item.id;
+            div.dataset.category = category;
+            
+            div.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <h3>${item.name}</h3>
+                <p>${item.description}</p>
+                ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)}</p>` : ''}
+            `;
+
+            div.addEventListener('click', () => selectItem(item, category, div));
+            return div;
+        }
+
+        // Function to select an item
+        function selectItem(item, category, element) {
+            // Remove selection from other items in the same category
+            document.querySelectorAll(`#${category} .menu-item`).forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Add selection to clicked item
+            element.classList.add('selected');
+            selectedItems[category] = item;
+            updateSummary();
+        }
+
+        // Function to update summary and total price
+        function updateSummary() {
+            const summaryElement = document.getElementById('selected-items');
+            let html = '';
+            let total = 0;
+
+            for (const [category, item] of Object.entries(selectedItems)) {
+                if (item) {
+                    html += `<p>${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)})` : ''}</p>`;
+                    total += item.upgradePrice;
+                }
+            }
+
+            summaryElement.innerHTML = html;
+            document.getElementById('total-price').textContent = total.toFixed(2);
+        }
+
+        // Initialize menu
+        window.addEventListener('DOMContentLoaded', () => {
+            for (const [category, items] of Object.entries(menuData)) {
+                const container = document.getElementById(category);
+                items.forEach(item => {
+                    container.appendChild(createMenuItem(item, category));
+                });
+            }
+        });
+    </script>
+</body>
+</html>
