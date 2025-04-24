@@ -117,6 +117,84 @@
             text-align: center;
             padding: 20px;
         }
+
+        .booking-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        /* New styles for the first two form groups */
+        .form-group:nth-child(1) input, /* Your name */
+        .form-group:nth-child(2) input { /* Booking date */
+            width: 300px; /* Fixed width for these inputs */
+            max-width: 100%; /* Ensures mobile responsiveness */
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: white;
+        }
+
+        .form-group select {
+            width: 100%; /* Keeps the select boxes full width in their grid cells */
+            cursor: pointer;
+        }
+
+        .form-group select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        input:invalid {
+            border-color: #e74c3c;
+        }
+
+        input[type="date"] {
+            font-family: inherit;
+        }
+
+        /* Media query for mobile responsiveness */
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+            
+            .form-group:nth-child(1) input,
+            .form-group:nth-child(2) input {
+                width: 100%; /* Full width on mobile */
+            }
+        }
     </style>
     <!-- Add Papa Parse library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -125,6 +203,37 @@
     <div class="container">
         <h1>Build Your Custom Dinner Menu</h1>
         
+        <!-- Move the booking form here, right after the title -->
+        <div class="booking-form">
+            <div class="form-group">
+                <label for="customer-name">Your name:</label>
+                <input type="text" id="customer-name" name="customer-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="booking-date">Booking date:</label>
+                <input type="date" id="booking-date" name="booking-date" required>
+                <span class="error-message" id="date-error"></span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="adult-count">Number of Adults:</label>
+                    <select id="adult-count" name="adult-count" required>
+                        <option value="" disabled selected>Select number of adults</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="kid-count">Number of Kids: (age 12 or below)</label>
+                    <select id="kid-count" name="kid-count" required>
+                        <option value="" disabled selected>Select number of kids</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course sections follow -->
         <div class="course-section">
             <h2 class="course-title">Soups</h2>
             <div class="menu-items" id="soups"></div>
@@ -353,9 +462,72 @@
             }
         }
 
+        // Function to set up date constraints
+        function setupDatePicker() {
+            const dateInput = document.getElementById('booking-date');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1); // Start from tomorrow
+            const maxDate = new Date();
+            maxDate.setMonth(maxDate.getMonth() + 3);
+
+            // Format dates to YYYY-MM-DD
+            const formatDate = (date) => {
+                const d = new Date(date);
+                let month = '' + (d.getMonth() + 1);
+                let day = '' + d.getDate();
+                const year = d.getFullYear();
+
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+
+                return [year, month, day].join('-');
+            };
+
+            // Set min and max dates
+            dateInput.min = formatDate(tomorrow);
+            dateInput.max = formatDate(maxDate);
+
+            // Validate date selection
+            dateInput.addEventListener('change', (e) => {
+                const selectedDate = new Date(e.target.value);
+                const errorElement = document.getElementById('date-error');
+
+                if (selectedDate < tomorrow || selectedDate > maxDate) {
+                    errorElement.textContent = 'Please select a date within the next 3 months (excluding today)';
+                    e.target.value = '';
+                } else {
+                    errorElement.textContent = '';
+                }
+            });
+        }
+
+        // Function to populate number select dropdowns
+        function setupNumberSelects() {
+            const adultSelect = document.getElementById('adult-count');
+            const kidSelect = document.getElementById('kid-count');
+
+            // Populate adults dropdown (1-18)
+            for (let i = 1; i <= 18; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                adultSelect.appendChild(option);
+            }
+
+            // Populate kids dropdown (0-9)
+            for (let i = 0; i <= 9; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                kidSelect.appendChild(option);
+            }
+        }
+
         // Start the application
         window.addEventListener('DOMContentLoaded', () => {
             console.log('DOM Content Loaded, initializing menu...');
+            setupDatePicker();
+            setupNumberSelects();
             initializeMenu();
         });
     </script>
