@@ -153,6 +153,14 @@
     </div>
 
     <script>
+        // Declare selectedItems at the top level scope
+        const selectedItems = {
+            soups: null,
+            starters: null,
+            mains: null,
+            desserts: null
+        };
+
         async function fetchMenuData() {
             try {
                 const PUBLISHED_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQp_lmQ3G1BBHVC5Lotsbtid6IO9kA83VGmKeI2e_Q31_LXtsFM8v2ZyvloRxo7FMixbu46ofyPq9JF/pub?gid=0&single=true&output=csv';
@@ -224,6 +232,9 @@
                 desserts: []
             };
 
+            // Default placeholder image from a reliable source
+            const defaultImage = 'https://placehold.co/150x150';
+
             csvData.forEach(row => {
                 // Skip empty rows or rows without required fields
                 if (!row.Category || !row.ID || !row.Name) return;
@@ -232,7 +243,8 @@
                     id: row.ID,
                     name: row.Name,
                     description: row.Description || '',
-                    image: row['Image URL'] || 'https://via.placeholder.com/150',
+                    // Use the provided image URL or fall back to the default placeholder
+                    image: (row['Image URL'] && row['Image URL'].trim()) || defaultImage,
                     upgradePrice: parseFloat(row['Upgrade Price']) || 0
                 };
 
@@ -253,7 +265,7 @@
             div.dataset.category = category;
             
             div.innerHTML = `
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/150'">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/150x150'">
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
                 ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)}</p>` : ''}
@@ -265,9 +277,12 @@
 
         // Function to select an item
         function selectItem(item, category, element) {
+            // Remove selection from other items in the same category
             document.querySelectorAll(`#${category} .menu-item`).forEach(el => {
                 el.classList.remove('selected');
             });
+
+            // Add selection to clicked item
             element.classList.add('selected');
             selectedItems[category] = item;
             updateSummary();
