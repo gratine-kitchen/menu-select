@@ -195,6 +195,45 @@
                 width: 100%; /* Full width on mobile */
             }
         }
+
+        /* Add these new styles */
+        .course-count-group {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .course-count-group select {
+            width: 300px;
+            max-width: 100%;
+        }
+
+        .helper-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .price-summary {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .base-price, .upgrade-price {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .total-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
     </style>
     <!-- Add Papa Parse library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -231,6 +270,19 @@
                     </select>
                 </div>
             </div>
+
+            <!-- First, update the course count dropdown to have a proper initial value -->
+            <div class="form-group course-count-group">
+                <label for="course-count">Number of Courses:</label>
+                <select id="course-count" name="course-count" required>
+                    <option value="">Select number of courses</option>
+                    <option value="5">5 Course Menu ($588)</option>
+                    <option value="6">6 Course Menu ($638)</option>
+                    <option value="7">7 Course Menu ($688)</option>
+                    <option value="8">8 Course Menu ($728)</option>
+                </select>
+                <p class="helper-text">Base menu price includes all standard dishes. Upgrade charges will be added to the total.</p>
+            </div>
         </div>
         
         <!-- Course sections follow -->
@@ -260,7 +312,11 @@
         <div class="summary">
             <h2>Your Selection</h2>
             <div id="selected-items"></div>
-            <div class="total-price">Total: $<span id="total-price">0.00</span></div>
+            <div class="price-summary">
+                <div class="base-price">Base Menu Price: $<span id="base-price">0.00</span></div>
+                <div class="upgrade-price">Upgrade Charges: $<span id="upgrade-total">0.00</span></div>
+                <div class="total-price">Total Price: $<span id="total-price">0.00</span></div>
+            </div>
         </div>
     </div>
 
@@ -270,22 +326,26 @@
             soups: {
                 maxSelections: 2,
                 allowMultiple: true,
-                displayName: 'Soups'
+                displayName: 'Soups',
+                required: true
             },
             starters: {
                 maxSelections: 1,
                 allowMultiple: false,
-                displayName: 'Starters'
+                displayName: 'Starters',
+                required: true
             },
             mains: {
                 maxSelections: 2,
                 allowMultiple: true,
-                displayName: 'Main Courses'
+                displayName: 'Main Courses',
+                required: true
             },
             desserts: {
                 maxSelections: 2,
                 allowMultiple: true,
-                displayName: 'Desserts'
+                displayName: 'Desserts',
+                required: true
             }
         };
 
@@ -294,6 +354,17 @@
             acc[category] = courseConfig[category].allowMultiple ? [] : null;
             return acc;
         }, {});
+
+        // Menu prices configuration
+        const menuPrices = {
+            5: 588,
+            6: 638,
+            7: 688,
+            8: 728
+        };
+
+        // Track current menu price
+        let currentMenuPrice = 0;
 
         async function fetchMenuData() {
             try {
@@ -465,8 +536,15 @@
 
         function updateSummary() {
             const summaryElement = document.getElementById('selected-items');
+            const basePriceElement = document.getElementById('base-price');
+            const upgradeTotalElement = document.getElementById('upgrade-total');
+            const totalPriceElement = document.getElementById('total-price');
+            
             let html = '';
-            let total = 0;
+            let upgradeTotal = 0;
+
+            // First, always update the base price
+            basePriceElement.textContent = currentMenuPrice.toFixed(2);
 
             // Process all categories
             Object.entries(courseConfig).forEach(([category, config]) => {
@@ -479,17 +557,19 @@
                     // Multiple selections
                     items.forEach(item => {
                         html += `<p>- ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)})` : ''}</p>`;
-                    total += item.upgradePrice;
+                        upgradeTotal += item.upgradePrice;
                     });
                 } else {
                     // Single selection
                     html += `<p>- ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)})` : ''}</p>`;
-                    total += items.upgradePrice;
+                    upgradeTotal += items.upgradePrice;
                 }
             });
 
+            // Update the display
             summaryElement.innerHTML = html;
-            document.getElementById('total-price').textContent = total.toFixed(2);
+            upgradeTotalElement.textContent = upgradeTotal.toFixed(2);
+            totalPriceElement.textContent = (currentMenuPrice + upgradeTotal).toFixed(2);
         }
 
         // Initialize selection counts for all multiple-selection categories
@@ -610,13 +690,78 @@
             }
         }
 
-        // Start the application
+        // Update the course count change handler
+        function handleCourseCountChange(event) {
+            const selectedValue = event.target.value;
+            if (selectedValue) {
+                const totalCourses = parseInt(selectedValue);
+                currentMenuPrice = menuPrices[totalCourses];
+                console.log(`Selected ${totalCourses} course menu at $${currentMenuPrice}`);
+                
+                // Update max selections based on course count
+                if (totalCourses >= 7) {
+                    courseConfig.soups.maxSelections = 2;
+                    courseConfig.mains.maxSelections = 2;
+                    courseConfig.desserts.maxSelections = 2;
+                } else if (totalCourses >= 6) {
+                    courseConfig.soups.maxSelections = 2;
+                    courseConfig.mains.maxSelections = 2;
+                    courseConfig.desserts.maxSelections = 1;
+                } else {
+                    courseConfig.soups.maxSelections = 1;
+                    courseConfig.mains.maxSelections = 2;
+                    courseConfig.desserts.maxSelections = 1;
+                }
+
+                // Reset selections
+                Object.keys(selectedItems).forEach(category => {
+                    if (Array.isArray(selectedItems[category])) {
+                        selectedItems[category] = [];
+                    } else {
+                        selectedItems[category] = null;
+                    }
+                });
+
+                // Update UI
+                initializeSelectionCounts();
+                updateSummary();
+
+                // Reset selection styling
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.classList.remove('selected', 'disabled');
+                });
+            } else {
+                // Reset if no course count is selected
+                currentMenuPrice = 0;
+                updateSummary();
+            }
+        }
+
+        // Setup course count dropdown
+        function setupCourseCount() {
+            const courseCountSelect = document.getElementById('course-count');
+            
+            // Add change event listener
+            courseCountSelect.addEventListener('change', handleCourseCountChange);
+            
+            // Trigger initial update if a value is already selected
+            if (courseCountSelect.value) {
+                const event = new Event('change');
+                courseCountSelect.dispatchEvent(event);
+            }
+        }
+
+        // Initialize everything when the page loads
         window.addEventListener('DOMContentLoaded', () => {
             console.log('DOM Content Loaded, initializing menu...');
             setupDatePicker();
             setupNumberSelects();
+            setupCourseCount();
             initializeMenu();
             initializeSelectionCounts();
+            
+            // Force an initial summary update
+            updateSummary();
         });
     </script>
 </body>
