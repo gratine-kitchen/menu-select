@@ -317,6 +317,30 @@
         .close-modal:hover {
             color: #bbb;
         }
+
+        /* Add styles for serving style selection */
+        .serving-style-selection {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .radio-label {
+            display: inline-block;
+            margin-right: 20px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #2c3e50;
+        }
+
+        .radio-label input[type="radio"] {
+            margin-right: 5px;
+        }
+
+        .radio-label:hover {
+            color: #3498db;
+        }
     </style>
     <!-- Add Papa Parse library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -387,6 +411,16 @@
 
         <div class="course-section">
             <h2 class="course-title">Main Courses</h2>
+            <div class="serving-style-selection">
+                <label class="radio-label">
+                    <input type="radio" name="serving-style" value="individual" checked>
+                    Individually Served
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="serving-style" value="sharing">
+                    Family-Style Sharing
+                </label>
+            </div>
             <div class="selection-count" id="mains-count"></div>
             <div class="menu-items" id="mains"></div>
         </div>
@@ -453,6 +487,9 @@
 
         // Track current menu price
         let currentMenuPrice = 0;
+
+        // Track current serving style
+        let currentServingStyle = 'individual';
 
         async function fetchMenuData() {
             try {
@@ -521,7 +558,10 @@
             const menuData = {
                 soups: [],
                 starters: [],
-                mains: [],
+                mains: {
+                    individual: [],
+                    sharing: []
+                },
                 desserts: []
             };
 
@@ -540,12 +580,10 @@
                 // Handle Google Drive URLs
                 const fileId = driveUrl.match(/[-\w]{25,}/);
                 if (fileId) {
-                    // Use a different format for Google Drive URLs
                     return `https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w1000`;
                 }
 
                 // If we can't process the Google Drive URL, return default
-                console.log('Could not process Google Drive URL:', driveUrl);
                 return defaultImage;
             }
 
@@ -558,18 +596,19 @@
                     name: row.Name,
                     description: row.Description || '',
                     image: getDirectImageUrl(row['Image URL']),
-                    upgradePrice: parseFloat(row['Upgrade Price']) || 0
+                    upgradePrice: parseFloat(row['Upgrade Price']) || 0,
+                    servingStyle: (row['Serving Style'] || 'individual').toLowerCase().trim() // Normalize serving style
                 };
 
-                // Log the processed item for debugging
-                console.log('Processed menu item:', {
-                    name: item.name,
-                    originalImageUrl: row['Image URL'],
-                    processedImageUrl: item.image
-                });
-
                 const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
-                if (menuData[categoryKey]) {
+                if (categoryKey === 'mains') {
+                    // Add to appropriate mains array based on serving style
+                    if (item.servingStyle === 'sharing') {
+                        menuData.mains.sharing.push(item);
+                    } else {
+                        menuData.mains.individual.push(item);
+                    }
+                } else if (menuData[categoryKey]) {
                     menuData[categoryKey].push(item);
                 }
             });
@@ -716,6 +755,68 @@
             });
         }
 
+        function updateMainCourseDisplay() {
+            const mainsContainer = document.getElementById('mains');
+            const menuData = window.menuData; // Store menuData in window for access
+
+            if (!menuData) return;
+
+            // Clear existing items
+            mainsContainer.innerHTML = '';
+
+            // Get the current serving style
+            const servingStyle = document.querySelector('input[name="serving-style"]:checked').value;
+            currentServingStyle = servingStyle;
+
+            // Update max selections based on serving style
+            if (servingStyle === 'sharing') {
+                courseConfig.mains.maxSelections = 1; // Simplified as requested
+            } else {
+                courseConfig.mains.maxSelections = 2; // Default for individual
+            }
+
+            // Display items for the selected serving style
+            const items = menuData.mains[servingStyle];
+            if (items && items.length > 0) {
+                items.forEach(item => {
+                    mainsContainer.appendChild(createMenuItem(item, 'mains'));
+                });
+            } else {
+                mainsContainer.innerHTML = '<div class="error">No items available for this serving style</div>';
+            }
+
+            // Update selection count display
+            updateSelectionCount('mains');
+        }
+
+        // Add event listener for serving style change
+        document.querySelectorAll('input[name="serving-style"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                // Store current selections
+                const currentSelections = [...selectedItems.mains];
+                
+                // Update display
+                updateMainCourseDisplay();
+                
+                // Restore selections if they exist in the new serving style
+                if (currentSelections.length > 0) {
+                    const newItems = window.menuData.mains[currentServingStyle];
+                    currentSelections.forEach(selection => {
+                        const matchingItem = newItems.find(item => item.id === selection.id);
+                        if (matchingItem) {
+                            const element = document.querySelector(`#mains .menu-item[data-id="${matchingItem.id}"]`);
+                            if (element) {
+                                element.classList.add('selected');
+                                element.querySelector('input[type="checkbox"]').checked = true;
+                            }
+                        }
+                    });
+                }
+                
+                updateSelectionCount('mains');
+            });
+        });
+
         async function initializeMenu() {
             try {
                 console.log('Starting menu initialization...');
@@ -735,21 +836,29 @@
                 console.log('Menu data received:', menuData);
 
                 if (menuData) {
+                    // Store menuData in window for access
+                    window.menuData = menuData;
+
                     for (const [category, items] of Object.entries(menuData)) {
-                        const container = document.getElementById(category);
-                        if (container) {
-                            container.innerHTML = '';
-                            console.log(`Processing category ${category} with ${items.length} items`);
-                            
-                            if (items.length === 0) {
-                                container.innerHTML = '<div class="error">No items found for this category</div>';
-                            } else {
-                                items.forEach(item => {
-                                    container.appendChild(createMenuItem(item, category));
-                                });
-                            }
+                        if (category === 'mains') {
+                            // Handle mains separately
+                            updateMainCourseDisplay();
                         } else {
-                            console.warn(`Container not found for category: ${category}`);
+                            const container = document.getElementById(category);
+                            if (container) {
+                                container.innerHTML = '';
+                                console.log(`Processing category ${category} with ${items.length} items`);
+                                
+                                if (items.length === 0) {
+                                    container.innerHTML = '<div class="error">No items found for this category</div>';
+                                } else {
+                                    items.forEach(item => {
+                                        container.appendChild(createMenuItem(item, category));
+                                    });
+                                }
+                            } else {
+                                console.warn(`Container not found for category: ${category}`);
+                            }
                         }
                     }
                 } else {
