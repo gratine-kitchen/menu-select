@@ -141,6 +141,18 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        #selected-items {
+            margin-top: 15px;
+        }
+
+        #selected-items p {
+            margin: 5px 0;
+        }
+
+        #selected-items strong {
+            color: #2c3e50;
+        }
+
         .total-price {
             font-size: 1.2em;
             font-weight: bold;
@@ -412,23 +424,30 @@
             </div>
 
             <div class="form-group">
+                <label for="contact-number">Your contact number:</label>
+                <input type="tel" id="contact-number" name="contact-number" required>
+            </div>
+
+            <div class="form-group">
                 <label for="booking-date">Booking date:</label>
                 <input type="date" id="booking-date" name="booking-date" required>
                 <span class="error-message" id="date-error"></span>
             </div>
 
-            <div class="form-group">
-                <label for="adult-count">Number of Adults:</label>
-                <select id="adult-count" name="adult-count" required>
-                    <option value="" disabled selected>Select number of adults</option>
-                </select>
-            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="adult-count">Number of Adults:</label>
+                    <select id="adult-count" name="adult-count" required>
+                        <option value="" disabled selected>Select number of adults</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="kid-count">Number of Kids: (age 12 or below)</label>
-                <select id="kid-count" name="kid-count" required>
-                    <option value="" disabled selected>Select number of kids</option>
-                </select>
+                <div class="form-group">
+                    <label for="kid-count">Number of Kids: (age 12 or below)</label>
+                    <select id="kid-count" name="kid-count" required>
+                        <option value="0" selected>0</option>
+                    </select>
+                </div>
             </div>
 
             <!-- First, update the course count dropdown to have a proper initial value -->
@@ -454,6 +473,7 @@
 
         <div class="course-section">
             <h2 class="course-title">Starters</h2>
+            <p class="course-description">Our starters are mainly designed to be shared and everyone will be served the same. We have a large variety of starters... you can savor more of them by choosing menu with more courses. :-)</p>
             <div class="selection-count" id="starters-count"></div>
             <div class="menu-items" id="starters"></div>
         </div>
@@ -485,9 +505,6 @@
         <div class="summary">
             <h2 id="summary-heading">You have selected the <span id="course-count-display">0</span> course menu (<span id="menu-price-display">$0</span>) with the following dishes</h2>
             <div id="selected-items"></div>
-            <div class="price-summary">
-                <div class="base-price">Base Menu Price: $<span id="base-price">0.00</span></div>
-            </div>
         </div>
     </div>
 
@@ -765,14 +782,8 @@
 
         function updateSummary() {
             const summaryElement = document.getElementById('selected-items');
-            const basePriceElement = document.getElementById('base-price');
-            const upgradeTotalElement = document.getElementById('upgrade-total');
-            const totalPriceElement = document.getElementById('total-price');
             
             let html = '';
-            let upgradeTotal = 0;
-
-            basePriceElement.textContent = currentMenuPrice.toFixed(2);
 
             Object.entries(courseConfig).forEach(([category, config]) => {
                 const items = selectedItems[category];
@@ -783,17 +794,13 @@
                 if (Array.isArray(items)) {
                     items.forEach(item => {
                         html += `<p>- ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
-                        upgradeTotal += item.upgradePrice;
                     });
                 } else {
                     html += `<p>- ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
-                    upgradeTotal += items.upgradePrice;
                 }
             });
 
             summaryElement.innerHTML = html;
-            upgradeTotalElement.textContent = upgradeTotal.toFixed(2);
-            totalPriceElement.textContent = (currentMenuPrice + upgradeTotal).toFixed(2);
         }
 
         function initializeSelectionCounts() {
@@ -979,14 +986,14 @@
             const adultSelect = document.getElementById('adult-count');
             const kidSelect = document.getElementById('kid-count');
 
-            for (let i = 1; i <= 18; i++) {
+            for (let i = 2; i <= 18; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
                 adultSelect.appendChild(option);
             }
 
-            for (let i = 0; i <= 9; i++) {
+            for (let i = 1; i <= 9; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
