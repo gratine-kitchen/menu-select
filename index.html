@@ -234,6 +234,21 @@
             padding-top: 10px;
             border-top: 1px dashed #ddd;
         }
+
+        .selection-count.warning {
+            color: #f39c12;
+        }
+
+        .selection-count.error {
+            color: #e74c3c;
+        }
+
+        /* Add this if you want to show required selections more clearly */
+        .selection-count::after {
+            content: ' (Required)';
+            font-size: 0.9em;
+            font-style: italic;
+        }
     </style>
     <!-- Add Papa Parse library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -330,8 +345,8 @@
                 required: true
             },
             starters: {
-                maxSelections: 1,
-                allowMultiple: false,
+                maxSelections: 2,
+                allowMultiple: true,
                 displayName: 'Starters',
                 required: true
             },
@@ -490,8 +505,9 @@
             const selectedCount = selectedItems[category].length;
             const maxCount = config.maxSelections;
             
-            countElement.textContent = `Select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
-            countElement.classList.toggle('error', selectedCount >= maxCount);
+            countElement.textContent = `Select ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
+            countElement.classList.toggle('error', selectedCount > maxCount);
+            countElement.classList.toggle('warning', selectedCount < maxCount);
 
             // Disable unselected items if max is reached
             const menuItems = document.querySelectorAll(`#${category} .menu-item`);
@@ -504,18 +520,15 @@
 
         function selectItem(item, category, element) {
             const config = courseConfig[category];
-
             if (config.allowMultiple) {
-                // Handle multiple selections
                 const isSelected = element.classList.contains('selected');
+                const currentSelections = selectedItems[category].length;
                 
                 if (isSelected) {
-                    // Remove selection
                     element.classList.remove('selected');
                     selectedItems[category] = selectedItems[category].filter(i => i.id !== item.id);
                 } else {
-                    // Add selection if under max limit
-                    if (selectedItems[category].length < config.maxSelections) {
+                    if (currentSelections < config.maxSelections) {
                         element.classList.add('selected');
                         selectedItems[category].push(item);
                     }
@@ -523,12 +536,11 @@
                 
                 updateSelectionCount(category);
             } else {
-                // Single selection logic
-            document.querySelectorAll(`#${category} .menu-item`).forEach(el => {
-                el.classList.remove('selected');
-            });
-            element.classList.add('selected');
-            selectedItems[category] = item;
+                document.querySelectorAll(`#${category} .menu-item`).forEach(el => {
+                    el.classList.remove('selected');
+                });
+                element.classList.add('selected');
+                selectedItems[category] = item;
             }
             
             updateSummary();
@@ -543,10 +555,8 @@
             let html = '';
             let upgradeTotal = 0;
 
-            // First, always update the base price
             basePriceElement.textContent = currentMenuPrice.toFixed(2);
 
-            // Process all categories
             Object.entries(courseConfig).forEach(([category, config]) => {
                 const items = selectedItems[category];
                 if (!items || (Array.isArray(items) && items.length === 0)) return;
@@ -554,25 +564,21 @@
                 html += `<p><strong>${config.displayName}:</strong></p>`;
                 
                 if (Array.isArray(items)) {
-                    // Multiple selections
                     items.forEach(item => {
                         html += `<p>- ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)})` : ''}</p>`;
                         upgradeTotal += item.upgradePrice;
                     });
                 } else {
-                    // Single selection
                     html += `<p>- ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)})` : ''}</p>`;
                     upgradeTotal += items.upgradePrice;
                 }
             });
 
-            // Update the display
             summaryElement.innerHTML = html;
             upgradeTotalElement.textContent = upgradeTotal.toFixed(2);
             totalPriceElement.textContent = (currentMenuPrice + upgradeTotal).toFixed(2);
         }
 
-        // Initialize selection counts for all multiple-selection categories
         function initializeSelectionCounts() {
             Object.keys(courseConfig).forEach(category => {
                 if (courseConfig[category].allowMultiple) {
@@ -585,7 +591,6 @@
             try {
                 console.log('Starting menu initialization...');
                 
-                // Show loading state
                 document.querySelectorAll('.menu-items').forEach(el => {
                     el.innerHTML = '<div class="loading">Loading menu items...</div>';
                 });
@@ -601,8 +606,8 @@
                 console.log('Menu data received:', menuData);
 
                 if (menuData) {
-            for (const [category, items] of Object.entries(menuData)) {
-                const container = document.getElementById(category);
+                    for (const [category, items] of Object.entries(menuData)) {
+                        const container = document.getElementById(category);
                         if (container) {
                             container.innerHTML = '';
                             console.log(`Processing category ${category} with ${items.length} items`);
@@ -610,10 +615,10 @@
                             if (items.length === 0) {
                                 container.innerHTML = '<div class="error">No items found for this category</div>';
                             } else {
-                items.forEach(item => {
-                    container.appendChild(createMenuItem(item, category));
-                });
-            }
+                                items.forEach(item => {
+                                    container.appendChild(createMenuItem(item, category));
+                                });
+                            }
                         } else {
                             console.warn(`Container not found for category: ${category}`);
                         }
@@ -629,15 +634,13 @@
             }
         }
 
-        // Function to set up date constraints
         function setupDatePicker() {
             const dateInput = document.getElementById('booking-date');
             const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1); // Start from tomorrow
+            tomorrow.setDate(tomorrow.getDate() + 1);
             const maxDate = new Date();
             maxDate.setMonth(maxDate.getMonth() + 3);
 
-            // Format dates to YYYY-MM-DD
             const formatDate = (date) => {
                 const d = new Date(date);
                 let month = '' + (d.getMonth() + 1);
@@ -650,11 +653,9 @@
                 return [year, month, day].join('-');
             };
 
-            // Set min and max dates
             dateInput.min = formatDate(tomorrow);
             dateInput.max = formatDate(maxDate);
 
-            // Validate date selection
             dateInput.addEventListener('change', (e) => {
                 const selectedDate = new Date(e.target.value);
                 const errorElement = document.getElementById('date-error');
@@ -668,12 +669,10 @@
             });
         }
 
-        // Function to populate number select dropdowns
         function setupNumberSelects() {
             const adultSelect = document.getElementById('adult-count');
             const kidSelect = document.getElementById('kid-count');
 
-            // Populate adults dropdown (1-18)
             for (let i = 1; i <= 18; i++) {
                 const option = document.createElement('option');
                 option.value = i;
@@ -681,7 +680,6 @@
                 adultSelect.appendChild(option);
             }
 
-            // Populate kids dropdown (0-9)
             for (let i = 0; i <= 9; i++) {
                 const option = document.createElement('option');
                 option.value = i;
@@ -690,7 +688,6 @@
             }
         }
 
-        // Update the course count change handler
         function handleCourseCountChange(event) {
             const selectedValue = event.target.value;
             if (selectedValue) {
@@ -698,22 +695,29 @@
                 currentMenuPrice = menuPrices[totalCourses];
                 console.log(`Selected ${totalCourses} course menu at $${currentMenuPrice}`);
                 
-                // Update max selections based on course count
-                if (totalCourses >= 7) {
-                    courseConfig.soups.maxSelections = 2;
-                    courseConfig.mains.maxSelections = 2;
-                    courseConfig.desserts.maxSelections = 2;
-                } else if (totalCourses >= 6) {
-                    courseConfig.soups.maxSelections = 2;
-                    courseConfig.mains.maxSelections = 2;
-                    courseConfig.desserts.maxSelections = 1;
-                } else {
-                    courseConfig.soups.maxSelections = 1;
-                    courseConfig.mains.maxSelections = 2;
-                    courseConfig.desserts.maxSelections = 1;
+                switch(totalCourses) {
+                    case 5:
+                        courseConfig.starters.maxSelections = 2;
+                        break;
+                    case 6:
+                        courseConfig.starters.maxSelections = 3;
+                        break;
+                    case 7:
+                        courseConfig.starters.maxSelections = 4;
+                        break;
+                    case 8:
+                        courseConfig.starters.maxSelections = 5;
+                        break;
+                    default:
+                        courseConfig.starters.maxSelections = 2;
                 }
 
-                // Reset selections
+                courseConfig.soups.maxSelections = 2;
+                courseConfig.mains.maxSelections = 2;
+                courseConfig.desserts.maxSelections = 2;
+
+                console.log(`Updated starters max selections to: ${courseConfig.starters.maxSelections}`);
+
                 Object.keys(selectedItems).forEach(category => {
                     if (Array.isArray(selectedItems[category])) {
                         selectedItems[category] = [];
@@ -722,36 +726,39 @@
                     }
                 });
 
-                // Update UI
                 initializeSelectionCounts();
                 updateSummary();
 
-                // Reset selection styling
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.classList.remove('selected', 'disabled');
                 });
+
+                updateAllSelectionCounts();
             } else {
-                // Reset if no course count is selected
                 currentMenuPrice = 0;
                 updateSummary();
             }
         }
 
-        // Setup course count dropdown
         function setupCourseCount() {
             const courseCountSelect = document.getElementById('course-count');
             
-            // Add change event listener
             courseCountSelect.addEventListener('change', handleCourseCountChange);
             
-            // Trigger initial update if a value is already selected
             if (courseCountSelect.value) {
                 const event = new Event('change');
                 courseCountSelect.dispatchEvent(event);
             }
         }
 
-        // Initialize everything when the page loads
+        function updateAllSelectionCounts() {
+            Object.keys(courseConfig).forEach(category => {
+                if (courseConfig[category].allowMultiple) {
+                    updateSelectionCount(category);
+                }
+            });
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             console.log('DOM Content Loaded, initializing menu...');
             setupDatePicker();
@@ -760,7 +767,6 @@
             initializeMenu();
             initializeSelectionCounts();
             
-            // Force an initial summary update
             updateSummary();
         });
     </script>
