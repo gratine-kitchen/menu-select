@@ -271,11 +271,9 @@
             color: #e74c3c;
         }
 
-        /* Add this if you want to show required selections more clearly */
+        /* Remove the "(Required)" text */
         .selection-count::after {
-            content: ' (Required)';
-            font-size: 0.9em;
-            font-style: italic;
+            content: '';
         }
 
         /* Modal styles */
@@ -379,6 +377,7 @@
 
         <div class="course-section">
             <h2 class="course-title">Starters</h2>
+            <div class="selection-count" id="starters-count"></div>
             <div class="menu-items" id="starters"></div>
         </div>
 
