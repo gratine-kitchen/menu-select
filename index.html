@@ -236,6 +236,7 @@
         <!-- Course sections follow -->
         <div class="course-section">
             <h2 class="course-title">Soups</h2>
+            <div class="selection-count" id="soups-count"></div>
             <div class="menu-items" id="soups"></div>
         </div>
 
@@ -246,11 +247,13 @@
 
         <div class="course-section">
             <h2 class="course-title">Main Courses</h2>
+            <div class="selection-count" id="mains-count"></div>
             <div class="menu-items" id="mains"></div>
         </div>
 
         <div class="course-section">
             <h2 class="course-title">Desserts</h2>
+            <div class="selection-count" id="desserts-count"></div>
             <div class="menu-items" id="desserts"></div>
         </div>
 
@@ -262,13 +265,35 @@
     </div>
 
     <script>
-        // Declare selectedItems at the top level scope
-        const selectedItems = {
-            soups: null,
-            starters: null,
-            mains: null,
-            desserts: null
+        // Configuration object for course selections
+        const courseConfig = {
+            soups: {
+                maxSelections: 2,
+                allowMultiple: true,
+                displayName: 'Soups'
+            },
+            starters: {
+                maxSelections: 1,
+                allowMultiple: false,
+                displayName: 'Starters'
+            },
+            mains: {
+                maxSelections: 2,
+                allowMultiple: true,
+                displayName: 'Main Courses'
+            },
+            desserts: {
+                maxSelections: 2,
+                allowMultiple: true,
+                displayName: 'Desserts'
+            }
         };
+
+        // Initialize selectedItems based on configuration
+        const selectedItems = Object.keys(courseConfig).reduce((acc, category) => {
+            acc[category] = courseConfig[category].allowMultiple ? [] : null;
+            return acc;
+        }, {});
 
         async function fetchMenuData() {
             try {
@@ -384,34 +409,96 @@
             return div;
         }
 
-        // Function to select an item
+        function updateSelectionCount(category) {
+            const config = courseConfig[category];
+            if (!config.allowMultiple) return;
+
+            const countElement = document.getElementById(`${category}-count`);
+            if (!countElement) return;
+
+            const selectedCount = selectedItems[category].length;
+            const maxCount = config.maxSelections;
+            
+            countElement.textContent = `Select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
+            countElement.classList.toggle('error', selectedCount >= maxCount);
+
+            // Disable unselected items if max is reached
+            const menuItems = document.querySelectorAll(`#${category} .menu-item`);
+            menuItems.forEach(item => {
+                if (!item.classList.contains('selected')) {
+                    item.classList.toggle('disabled', selectedCount >= maxCount);
+                }
+            });
+        }
+
         function selectItem(item, category, element) {
-            // Remove selection from other items in the same category
+            const config = courseConfig[category];
+
+            if (config.allowMultiple) {
+                // Handle multiple selections
+                const isSelected = element.classList.contains('selected');
+                
+                if (isSelected) {
+                    // Remove selection
+                    element.classList.remove('selected');
+                    selectedItems[category] = selectedItems[category].filter(i => i.id !== item.id);
+                } else {
+                    // Add selection if under max limit
+                    if (selectedItems[category].length < config.maxSelections) {
+                        element.classList.add('selected');
+                        selectedItems[category].push(item);
+                    }
+                }
+                
+                updateSelectionCount(category);
+            } else {
+                // Single selection logic
             document.querySelectorAll(`#${category} .menu-item`).forEach(el => {
                 el.classList.remove('selected');
             });
-
-            // Add selection to clicked item
             element.classList.add('selected');
             selectedItems[category] = item;
+            }
+            
             updateSummary();
         }
 
-        // Function to update summary and total price
         function updateSummary() {
             const summaryElement = document.getElementById('selected-items');
             let html = '';
             let total = 0;
 
-            for (const [category, item] of Object.entries(selectedItems)) {
-                if (item) {
-                    html += `<p>${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)})` : ''}</p>`;
+            // Process all categories
+            Object.entries(courseConfig).forEach(([category, config]) => {
+                const items = selectedItems[category];
+                if (!items || (Array.isArray(items) && items.length === 0)) return;
+
+                html += `<p><strong>${config.displayName}:</strong></p>`;
+                
+                if (Array.isArray(items)) {
+                    // Multiple selections
+                    items.forEach(item => {
+                        html += `<p>- ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)})` : ''}</p>`;
                     total += item.upgradePrice;
+                    });
+                } else {
+                    // Single selection
+                    html += `<p>- ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)})` : ''}</p>`;
+                    total += items.upgradePrice;
                 }
-            }
+            });
 
             summaryElement.innerHTML = html;
             document.getElementById('total-price').textContent = total.toFixed(2);
+        }
+
+        // Initialize selection counts for all multiple-selection categories
+        function initializeSelectionCounts() {
+            Object.keys(courseConfig).forEach(category => {
+                if (courseConfig[category].allowMultiple) {
+                    updateSelectionCount(category);
+                }
+            });
         }
 
         async function initializeMenu() {
@@ -434,8 +521,8 @@
                 console.log('Menu data received:', menuData);
 
                 if (menuData) {
-                    for (const [category, items] of Object.entries(menuData)) {
-                        const container = document.getElementById(category);
+            for (const [category, items] of Object.entries(menuData)) {
+                const container = document.getElementById(category);
                         if (container) {
                             container.innerHTML = '';
                             console.log(`Processing category ${category} with ${items.length} items`);
@@ -443,10 +530,10 @@
                             if (items.length === 0) {
                                 container.innerHTML = '<div class="error">No items found for this category</div>';
                             } else {
-                                items.forEach(item => {
-                                    container.appendChild(createMenuItem(item, category));
-                                });
-                            }
+                items.forEach(item => {
+                    container.appendChild(createMenuItem(item, category));
+                });
+            }
                         } else {
                             console.warn(`Container not found for category: ${category}`);
                         }
@@ -529,6 +616,7 @@
             setupDatePicker();
             setupNumberSelects();
             initializeMenu();
+            initializeSelectionCounts();
         });
     </script>
 </body>
