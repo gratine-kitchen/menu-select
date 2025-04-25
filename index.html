@@ -42,6 +42,17 @@
             margin-bottom: 15px;
         }
 
+        .course-description {
+            font-family: 'Georgia', serif;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 20px;
+            padding: 0 10px;
+            font-style: italic;
+            letter-spacing: 0.3px;
+        }
+
         .menu-items {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -324,22 +335,60 @@
             padding: 10px;
             background-color: #f8f9fa;
             border-radius: 4px;
+            display: flex;
+            gap: 10px;
         }
 
         .radio-label {
-            display: inline-block;
-            margin-right: 20px;
+            flex: 1;
+            position: relative;
             cursor: pointer;
-            font-size: 1em;
-            color: #2c3e50;
+            padding: 10px 15px;
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            text-align: center;
+            transition: all 0.3s ease;
         }
 
         .radio-label input[type="radio"] {
-            margin-right: 5px;
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
 
         .radio-label:hover {
+            border-color: #3498db;
             color: #3498db;
+        }
+
+        .radio-label input[type="radio"]:checked + span {
+            color: #2c3e50;
+        }
+
+        .radio-label input[type="radio"]:checked + span::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -15px;
+            right: -15px;
+            bottom: -10px;
+            background-color: #e3f2fd;
+            border-radius: 6px;
+            z-index: -1;
+        }
+
+        .radio-label span {
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        /* New styles for the selected state */
+        .radio-label.selected {
+            background-color: #e3f2fd;
+            border-color: #3498db;
         }
     </style>
     <!-- Add Papa Parse library -->
@@ -411,14 +460,15 @@
 
         <div class="course-section">
             <h2 class="course-title">Main Courses</h2>
+            <p class="course-description">For the main course of meat, you have the option of individual plating or family-style. While individual plating is more common, you may want to consider family-style if people want to taste more than 1 dish... as multiple meat items will be served on a platter for sharing.</p>
             <div class="serving-style-selection">
                 <label class="radio-label">
                     <input type="radio" name="serving-style" value="individual" checked>
-                    Individually Served
+                    <span>Individually Served</span>
                 </label>
                 <label class="radio-label">
                     <input type="radio" name="serving-style" value="sharing">
-                    Family-Style Sharing
+                    <span>Family-Style Sharing</span>
                 </label>
             </div>
             <div class="selection-count" id="mains-count"></div>
@@ -792,6 +842,17 @@
         // Add event listener for serving style change
         document.querySelectorAll('input[name="serving-style"]').forEach(radio => {
             radio.addEventListener('change', () => {
+                // Remove selected class from all labels
+                document.querySelectorAll('.radio-label').forEach(label => {
+                    label.classList.remove('selected');
+                });
+                
+                // Add selected class to the checked label
+                const checkedLabel = document.querySelector('input[name="serving-style"]:checked').closest('.radio-label');
+                if (checkedLabel) {
+                    checkedLabel.classList.add('selected');
+                }
+                
                 // Store current selections
                 const currentSelections = [...selectedItems.mains];
                 
@@ -815,6 +876,14 @@
                 
                 updateSelectionCount('mains');
             });
+        });
+
+        // Initialize the selected state
+        window.addEventListener('DOMContentLoaded', () => {
+            const checkedLabel = document.querySelector('input[name="serving-style"]:checked').closest('.radio-label');
+            if (checkedLabel) {
+                checkedLabel.classList.add('selected');
+            }
         });
 
         async function initializeMenu() {
