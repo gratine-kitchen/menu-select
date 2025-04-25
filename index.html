@@ -455,6 +455,27 @@
             // Default placeholder image from a reliable source
             const defaultImage = 'https://placehold.co/150x150';
 
+            // Function to convert Google Drive URL to direct image URL
+            function getDirectImageUrl(driveUrl) {
+                if (!driveUrl) return defaultImage;
+                
+                // If it's not a Google Drive URL, return it as is
+                if (!driveUrl.includes('drive.google.com')) {
+                    return driveUrl;
+                }
+
+                // Handle Google Drive URLs
+                const fileId = driveUrl.match(/[-\w]{25,}/);
+                if (fileId) {
+                    // Use a different format for Google Drive URLs
+                    return `https://drive.google.com/thumbnail?id=${fileId[0]}&sz=w1000`;
+                }
+
+                // If we can't process the Google Drive URL, return default
+                console.log('Could not process Google Drive URL:', driveUrl);
+                return defaultImage;
+            }
+
             csvData.forEach(row => {
                 // Skip empty rows or rows without required fields
                 if (!row.Category || !row.ID || !row.Name) return;
@@ -463,10 +484,16 @@
                     id: row.ID,
                     name: row.Name,
                     description: row.Description || '',
-                    // Use the provided image URL or fall back to the default placeholder
-                    image: (row['Image URL'] && row['Image URL'].trim()) || defaultImage,
+                    image: getDirectImageUrl(row['Image URL']),
                     upgradePrice: parseFloat(row['Upgrade Price']) || 0
                 };
+
+                // Log the processed item for debugging
+                console.log('Processed menu item:', {
+                    name: item.name,
+                    originalImageUrl: row['Image URL'],
+                    processedImageUrl: item.image
+                });
 
                 const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
                 if (menuData[categoryKey]) {
