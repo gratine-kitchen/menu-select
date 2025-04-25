@@ -435,11 +435,10 @@
             <div class="form-group course-count-group">
                 <label for="course-count">Number of Courses:</label>
                 <select id="course-count" name="course-count" required>
-                    <option value="">Select number of courses</option>
-                    <option value="5">5 Course Menu ($588)</option>
-                    <option value="6">6 Course Menu ($638)</option>
-                    <option value="7">7 Course Menu ($688)</option>
-                    <option value="8">8 Course Menu ($728)</option>
+                    <option value="5" selected>5 Course Menu - 2 starters ($588)</option>
+                    <option value="6">6 Course Menu - 3 starters ($638)</option>
+                    <option value="7">7 Course Menu - 4 starters ($688)</option>
+                    <option value="8">8 Course Menu - 5 starters ($728)</option>
                 </select>
                 <p class="helper-text">Base menu price includes all standard dishes. Upgrade charges will be added to the total.</p>
             </div>
@@ -448,6 +447,7 @@
         <!-- Course sections follow -->
         <div class="course-section">
             <h2 class="course-title">Soups</h2>
+            <p class="course-description">You can select up to 2 soup items for your guests to choose from...</p>
             <div class="selection-count" id="soups-count"></div>
             <div class="menu-items" id="soups"></div>
         </div>
@@ -477,17 +477,16 @@
 
         <div class="course-section">
             <h2 class="course-title">Desserts</h2>
+            <p class="course-description">You can select up to 2 dessert items for your guests to choose from...</p>
             <div class="selection-count" id="desserts-count"></div>
             <div class="menu-items" id="desserts"></div>
         </div>
 
         <div class="summary">
-            <h2>Your Selection</h2>
+            <h2 id="summary-heading">You have selected the <span id="course-count-display">0</span> course menu (<span id="menu-price-display">$0</span>) with the following dishes</h2>
             <div id="selected-items"></div>
             <div class="price-summary">
                 <div class="base-price">Base Menu Price: $<span id="base-price">0.00</span></div>
-                <div class="upgrade-price">Upgrade Charges: $<span id="upgrade-total">0.00</span></div>
-                <div class="total-price">Total Price: $<span id="total-price">0.00</span></div>
             </div>
         </div>
     </div>
@@ -678,7 +677,7 @@
                 <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/150x150'" class="menu-image">
                 <h3>${item.name}</h3>
                 <p>${item.description}</p>
-                ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)}</p>` : ''}
+                ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)} (per guest)</p>` : ''}
             `;
 
             const checkbox = div.querySelector('input[type="checkbox"]');
@@ -783,11 +782,11 @@
                 
                 if (Array.isArray(items)) {
                     items.forEach(item => {
-                        html += `<p>- ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)})` : ''}</p>`;
+                        html += `<p>- ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
                         upgradeTotal += item.upgradePrice;
                     });
                 } else {
-                    html += `<p>- ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)})` : ''}</p>`;
+                    html += `<p>- ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
                     upgradeTotal += items.upgradePrice;
                 }
             });
@@ -1002,6 +1001,10 @@
                 currentMenuPrice = menuPrices[totalCourses];
                 console.log(`Selected ${totalCourses} course menu at $${currentMenuPrice}`);
                 
+                // Update the course count and price display
+                document.getElementById('course-count-display').textContent = totalCourses;
+                document.getElementById('menu-price-display').textContent = `$${currentMenuPrice}`;
+                
                 switch(totalCourses) {
                     case 5:
                         courseConfig.starters.maxSelections = 2;
@@ -1102,6 +1105,11 @@
             setupCourseCount();
             initializeMenu();
             initializeSelectionCounts();
+            
+            // Trigger the course count change event to initialize the display
+            const courseCountSelect = document.getElementById('course-count');
+            const event = new Event('change');
+            courseCountSelect.dispatchEvent(event);
             
             updateSummary();
         });
