@@ -271,6 +271,10 @@
             color: #e74c3c;
         }
 
+        .selection-count.success {
+            color: #27ae60;
+        }
+
         /* Remove the "(Required)" text */
         .selection-count::after {
             content: '';
@@ -616,8 +620,18 @@
             const maxCount = config.maxSelections;
             
             countElement.textContent = `Select ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
-            countElement.classList.toggle('error', selectedCount > maxCount);
-            countElement.classList.toggle('warning', selectedCount < maxCount);
+            
+            // Remove all state classes first
+            countElement.classList.remove('error', 'warning', 'success');
+            
+            // Add appropriate state class
+            if (selectedCount > maxCount) {
+                countElement.classList.add('error');
+            } else if (selectedCount < maxCount) {
+                countElement.classList.add('warning');
+            } else {
+                countElement.classList.add('success');
+            }
 
             // Disable unselected items if max is reached
             const menuItems = document.querySelectorAll(`#${category} .menu-item`);
