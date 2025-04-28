@@ -487,6 +487,26 @@
                 max-width: 100%;
             }
         }
+
+        /* Development Only - Start */
+        .dev-tools {
+            border: 1px dashed #ccc;
+        }
+
+        .test-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .test-btn:hover {
+            background-color: #5a6268;
+        }
+        /* Development Only - End */
     </style>
     <!-- Add Papa Parse library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -505,6 +525,12 @@
         
         <!-- Move the booking form here, right after the title -->
         <div class="booking-form">
+            <!-- Development Only - Start -->
+            <div class="dev-tools" style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                <button id="test-data" class="test-btn">Populate Test Data</button>
+            </div>
+            <!-- Development Only - End -->
+
             <div class="form-group">
                 <label for="customer-name">Your name:</label>
                 <input type="text" id="customer-name" name="customer-name" required>
@@ -1364,6 +1390,108 @@
 
         // Add click event listener to the WhatsApp button
         document.getElementById('send-whatsapp').addEventListener('click', sendWhatsApp);
+
+        // Development Only - Start
+        function populateTestData() {
+            console.log('Starting test data population...');
+
+            // Populate form fields
+            document.getElementById('customer-name').value = 'John Doe';
+            document.getElementById('contact-number').value = '12345678';
+            document.getElementById('booking-date').value = '2024-04-01';
+            document.getElementById('adult-count').value = '4';
+            document.getElementById('kid-count').value = '2';
+            document.getElementById('course-count').value = '6';
+
+            // Trigger course count change to update the display
+            const courseCountEvent = new Event('change');
+            document.getElementById('course-count').dispatchEvent(courseCountEvent);
+
+            // Function to select menu items
+            function selectMenuItems() {
+                console.log('Selecting menu items...');
+                console.log('Menu data available:', window.menuData);
+
+                // Always select "Individually Served" for mains
+                const individualStyleRadio = document.querySelector('input[name="serving-style"][value="individual"]');
+                if (individualStyleRadio) {
+                    console.log('Selecting individual serving style');
+                    individualStyleRadio.checked = true;
+                    individualStyleRadio.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+
+                const categories = ['soups', 'starters', 'mains', 'desserts'];
+                categories.forEach(category => {
+                    console.log(`Processing category: ${category}`);
+                    const items = Array.from(document.querySelectorAll(`#${category} .menu-item`));
+                    console.log(`Found ${items.length} items in ${category}`);
+
+                    if (items.length > 0) {
+                        // Determine how many items to select based on category and course count
+                        let itemsToSelect = 2; // Default for most categories
+                        if (category === 'starters') {
+                            const courseCount = parseInt(document.getElementById('course-count').value);
+                            switch(courseCount) {
+                                case 5: itemsToSelect = 2; break;
+                                case 6: itemsToSelect = 3; break;
+                                case 7: itemsToSelect = 4; break;
+                                case 8: itemsToSelect = 5; break;
+                                default: itemsToSelect = 2;
+                            }
+                        }
+
+                        // Select the appropriate number of items
+                        items.slice(0, itemsToSelect).forEach((item, index) => {
+                            console.log(`Selecting item ${index + 1} in ${category}`);
+                            // Get the item data from the dataset
+                            const itemId = item.dataset.id;
+                            console.log(`Item ID: ${itemId}`);
+                            
+                            if (window.menuData) {
+                                let itemData;
+                                if (category === 'mains') {
+                                    // For mains, check both individual and sharing items
+                                    itemData = window.menuData.mains.individual.find(i => i.id === itemId) || 
+                                             window.menuData.mains.sharing.find(i => i.id === itemId);
+                                } else {
+                                    itemData = window.menuData[category].find(i => i.id === itemId);
+                                }
+                                
+                                console.log(`Found item data:`, itemData);
+                                
+                                if (itemData) {
+                                    // Call the selectItem function directly
+                                    selectItem(itemData, category, item);
+                                    console.log(`Selected item in ${category}`);
+                                }
+                            } else {
+                                console.log(`No menu data available for ${category}`);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Wait for menu data to be available
+            const checkMenuData = setInterval(() => {
+                if (window.menuData) {
+                    console.log('Menu data is available, proceeding with selection');
+                    clearInterval(checkMenuData);
+                    // Wait a bit more to ensure DOM is updated
+                    setTimeout(selectMenuItems, 500);
+                }
+            }, 100);
+
+            // Stop checking after 5 seconds to prevent infinite loop
+            setTimeout(() => {
+                clearInterval(checkMenuData);
+                console.log('Menu data check timeout reached');
+            }, 5000);
+        }
+
+        // Add click event listener to test button
+        document.getElementById('test-data').addEventListener('click', populateTestData);
+        // Development Only - End
     </script>
 </body>
 </html>
