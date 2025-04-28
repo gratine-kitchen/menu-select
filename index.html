@@ -460,7 +460,7 @@
         .whatsapp-btn {
             background-color: #25D366;
             color: white;
-            display: none; /* Hide by default */
+            /* display: none; Hide by default */
         }
 
         .whatsapp-btn:hover {
@@ -1377,12 +1377,11 @@
                     .replace(/<\/strong>/g, '');
 
                 // Create the message
-                const message = `New menu selection from ${name}\n\n` +
-                    `Contact: ${contactNumber}\n` +
-                    `Booking Date: ${bookingDate}\n` +
-                    `Adults: ${adultCount}\n` +
-                    `Kids: ${kidCount}\n\n` +
-                    `Selected Menu:\n${formattedItems}`;
+                const message = `Hi, this is *${name}* regarding my menu selection for ${bookingDate}...\n\n` +
+                    `*#Adults:* ${adultCount}\n` +
+                    `*#Kids:* ${kidCount}\n` +
+                    `*Selected Menu:* ${courseCount} course menu ($${currentMenuPrice})\n\n` +
+                    `And here are my choices for the different courses:\n\n${formattedItems}`;
 
                 // Encode the message for URL
                 const encodedMessage = encodeURIComponent(message);
