@@ -702,56 +702,23 @@
             try {
                 const PUBLISHED_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQp_lmQ3G1BBHVC5Lotsbtid6IO9kA83VGmKeI2e_Q31_LXtsFM8v2ZyvloRxo7FMixbu46ofyPq9JF/pub?gid=0&single=true&output=csv';
                 
-                // Try direct fetch with no-cors mode first
-                try {
-                    const response = await fetch(PUBLISHED_CSV_URL, {
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'text/csv'
-                        }
-                    });
+                // Add cache-busting parameter
+                const timestamp = new Date().getTime();
+                const urlWithCacheBust = `${PUBLISHED_CSV_URL}&_=${timestamp}`;
+                
+                console.log('Fetching menu data...');
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const csvText = await response.text();
-                    if (!csvText || csvText.trim() === '') {
-                        throw new Error('Empty response received');
-                    }
-
-                    return new Promise((resolve, reject) => {
-                        Papa.parse(csvText, {
-                            header: true,
-                            skipEmptyLines: true,
-                            complete: function(results) {
-                                if (results.data && results.data.length > 0) {
-                                    resolve(processCSVData(results.data));
-                                } else {
-                                    reject(new Error('No data found in CSV'));
-                                }
-                            },
-                            error: function(error) {
-                                reject(error);
-                            }
-                        });
-                    });
-                } catch (error) {
-                    console.log('Direct fetch failed, trying proxy services...', error);
-                }
-
-                // If direct fetch fails, try proxy services
+                // Try proxy services first
                 const proxyServices = [
-                    'https://api.allorigins.win/raw?url=',
-                    'https://cors-anywhere.herokuapp.com/',
                     'https://corsproxy.io/?',
+                    'https://api.allorigins.win/raw?url=',
                     'https://api.codetabs.com/v1/proxy?quest='
                 ];
 
                 // Try each proxy service in sequence
                 for (const proxy of proxyServices) {
                     try {
-                        const proxyUrl = proxy + encodeURIComponent(PUBLISHED_CSV_URL);
+                        const proxyUrl = proxy + encodeURIComponent(urlWithCacheBust);
                         console.log(`Trying proxy: ${proxy}`);
 
                         const response = await fetch(proxyUrl);
@@ -764,12 +731,15 @@
                             throw new Error('Empty response received');
                         }
 
+                        console.log('Successfully fetched CSV data through proxy');
                         return new Promise((resolve, reject) => {
                             Papa.parse(csvText, {
                                 header: true,
                                 skipEmptyLines: true,
                                 complete: function(results) {
                                     if (results.data && results.data.length > 0) {
+                                        // Debug: Log the first few rows of raw data
+                                        console.log('Raw CSV data (first 3 rows):', results.data.slice(0, 3));
                                         resolve(processCSVData(results.data));
                                     } else {
                                         reject(new Error('No data found in CSV'));
@@ -784,6 +754,42 @@
                         console.log(`Failed with proxy ${proxy}, trying next...`, error);
                         continue;
                     }
+                }
+
+                // If all proxies fail, try direct fetch as last resort
+                try {
+                    console.log('Trying direct fetch as last resort...');
+                    const response = await fetch(urlWithCacheBust);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const csvText = await response.text();
+                    if (!csvText || csvText.trim() === '') {
+                        throw new Error('Empty response received');
+                    }
+
+                    console.log('Successfully fetched CSV data directly');
+                    return new Promise((resolve, reject) => {
+                        Papa.parse(csvText, {
+                            header: true,
+                            skipEmptyLines: true,
+                            complete: function(results) {
+                                if (results.data && results.data.length > 0) {
+                                    // Debug: Log the first few rows of raw data
+                                    console.log('Raw CSV data (first 3 rows):', results.data.slice(0, 3));
+                                    resolve(processCSVData(results.data));
+                                } else {
+                                    reject(new Error('No data found in CSV'));
+                                }
+                            },
+                            error: function(error) {
+                                reject(error);
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.log('Direct fetch failed:', error);
                 }
 
                 throw new Error('All fetch attempts failed');
@@ -832,6 +838,19 @@
             csvData.forEach(row => {
                 // Skip empty rows or rows without required fields
                 if (!row.Category || !row.ID || !row.Name) return;
+
+                // Debug logging - show all column values for this row
+                console.log(`Processing item: ${row.Name}`);
+                console.log('Row data:', row);
+
+                // Skip inactive items - handle different possible boolean values
+                const isActive = row.IsActive?.toUpperCase();
+                console.log(`IsActive value for ${row.Name}: "${row.IsActive}" (normalized: "${isActive}")`);
+                
+                if (isActive !== 'TRUE' && isActive !== '1' && isActive !== 'YES') {
+                    console.log(`Skipping inactive item: ${row.Name}`);
+                    return;
+                }
 
                 const item = {
                     id: row.ID,
