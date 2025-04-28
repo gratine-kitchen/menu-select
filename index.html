@@ -481,7 +481,7 @@
         .whatsapp-btn {
             background-color: #25D366;
             color: white;
-            /* display: none; Hide by default */
+            display: none; /* Hide by default */
         }
 
         .whatsapp-btn:hover {
@@ -495,17 +495,29 @@
 
         /* Show WhatsApp button only on mobile devices */
         @media (max-width: 768px) {
+            .send-email-btn {
+                display: none;
+            }
+            
             .whatsapp-btn {
                 display: inline-block;
+                max-width: 100%;
             }
             
             .button-group {
                 flex-direction: column;
                 align-items: center;
             }
+        }
 
-            .send-email-btn, .whatsapp-btn {
-                max-width: 100%;
+        /* Show email button only on desktop */
+        @media (min-width: 769px) {
+            .whatsapp-btn {
+                display: none;
+            }
+            
+            .send-email-btn {
+                display: inline-block;
             }
         }
 
