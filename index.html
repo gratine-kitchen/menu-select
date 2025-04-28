@@ -402,9 +402,36 @@
             background-color: #e3f2fd;
             border-color: #3498db;
         }
+
+        /* Add styles for the send email button */
+        .send-email-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .send-email-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .send-email-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
     </style>
     <!-- Add Papa Parse library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- Add EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <!-- Add modal HTML -->
@@ -505,6 +532,7 @@
         <div class="summary">
             <h2 id="summary-heading">You have selected the <span id="course-count-display">0</span> course menu (<span id="menu-price-display">$0</span>) with the following dishes</h2>
             <div id="selected-items"></div>
+            <button id="send-email" class="send-email-btn">Send Menu Selection</button>
         </div>
     </div>
 
@@ -1148,6 +1176,75 @@
             
             updateSummary();
         });
+
+        // Initialize EmailJS with your public key
+        (function() {
+            emailjs.init("THRDFTRmfAZfOf6rF"); // Replace with your EmailJS public key
+        })();
+
+        // Function to send email
+        async function sendEmail() {
+            const button = document.getElementById('send-email');
+            button.disabled = true;
+            button.textContent = 'Sending...';
+
+            try {
+                // Get form data
+                const name = document.getElementById('customer-name').value;
+                const contactNumber = document.getElementById('contact-number').value;
+                const bookingDate = document.getElementById('booking-date').value;
+                const adultCount = document.getElementById('adult-count').value;
+                const kidCount = document.getElementById('kid-count').value;
+                const courseCount = document.getElementById('course-count').value;
+
+                // Validate required fields
+                if (!name || !contactNumber || !bookingDate || !adultCount || !kidCount || !courseCount) {
+                    throw new Error('Please fill in all required fields');
+                }
+
+                // Get selected items
+                const selectedItemsHtml = document.getElementById('selected-items').innerHTML;
+                const courseCountDisplay = document.getElementById('course-count-display').textContent;
+                const menuPriceDisplay = document.getElementById('menu-price-display').textContent;
+
+                // Format the selected items for email
+                const formattedItems = selectedItemsHtml
+                    .replace(/<p>/g, '')
+                    .replace(/<\/p>/g, '\n')
+                    .replace(/<strong>/g, '')
+                    .replace(/<\/strong>/g, '');
+
+                // Prepare email template parameters
+                const templateParams = {
+                    from_name: name,
+                    contact_number: contactNumber,
+                    booking_date: bookingDate,
+                    adult_count: adultCount,
+                    kid_count: kidCount,
+                    course_count: courseCountDisplay,
+                    menu_price: menuPriceDisplay,
+                    selected_items: formattedItems,
+                    message: `New menu selection from ${name}\n\nContact: ${contactNumber}\nBooking Date: ${bookingDate}\nAdults: ${adultCount}\nKids: ${kidCount}\n\nSelected Menu:\n${formattedItems}`
+                };
+
+                console.log('Sending email with params:', templateParams);
+
+                // Send email
+                const response = await emailjs.send('service_7dw383m', 'template_uckqo2e', templateParams);
+                console.log('Email sent successfully:', response);
+                
+                alert('Menu selection has been sent successfully!');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                alert(error.message || 'Failed to send menu selection. Please try again.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Send Menu Selection';
+            }
+        }
+
+        // Add click event listener to the send email button
+        document.getElementById('send-email').addEventListener('click', sendEmail);
     </script>
 </body>
 </html>
