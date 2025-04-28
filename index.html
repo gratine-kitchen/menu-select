@@ -427,6 +427,66 @@
             background-color: #bdc3c7;
             cursor: not-allowed;
         }
+
+        /* Add styles for the button group */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .send-email-btn, .whatsapp-btn {
+            display: inline-block;
+            width: 100%;
+            max-width: 200px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .send-email-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .send-email-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            display: none; /* Hide by default */
+        }
+
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+        }
+
+        .send-email-btn:disabled, .whatsapp-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Show WhatsApp button only on mobile devices */
+        @media (max-width: 768px) {
+            .whatsapp-btn {
+                display: inline-block;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .send-email-btn, .whatsapp-btn {
+                max-width: 100%;
+            }
+        }
     </style>
     <!-- Add Papa Parse library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -532,7 +592,10 @@
         <div class="summary">
             <h2 id="summary-heading">You have selected the <span id="course-count-display">0</span> course menu (<span id="menu-price-display">$0</span>) with the following dishes</h2>
             <div id="selected-items"></div>
-            <button id="send-email" class="send-email-btn">Send Menu Selection</button>
+            <div class="button-group">
+                <button id="send-email" class="send-email-btn">Send Menu Selection</button>
+                <button id="send-whatsapp" class="whatsapp-btn">Send via WhatsApp</button>
+            </div>
         </div>
     </div>
 
@@ -1245,6 +1308,62 @@
 
         // Add click event listener to the send email button
         document.getElementById('send-email').addEventListener('click', sendEmail);
+
+        // Function to send WhatsApp message
+        function sendWhatsApp() {
+            try {
+                // Get form data
+                const name = document.getElementById('customer-name').value;
+                const contactNumber = document.getElementById('contact-number').value;
+                const bookingDate = document.getElementById('booking-date').value;
+                const adultCount = document.getElementById('adult-count').value;
+                const kidCount = document.getElementById('kid-count').value;
+                const courseCount = document.getElementById('course-count').value;
+
+                // Validate required fields
+                if (!name || !contactNumber || !bookingDate || !adultCount || !kidCount || !courseCount) {
+                    throw new Error('Please fill in all required fields');
+                }
+
+                // Get selected items
+                const selectedItemsHtml = document.getElementById('selected-items').innerHTML;
+                const courseCountDisplay = document.getElementById('course-count-display').textContent;
+                const menuPriceDisplay = document.getElementById('menu-price-display').textContent;
+
+                // Format the selected items for WhatsApp
+                const formattedItems = selectedItemsHtml
+                    .replace(/<p>/g, '')
+                    .replace(/<\/p>/g, '\n')
+                    .replace(/<strong>/g, '')
+                    .replace(/<\/strong>/g, '');
+
+                // Create the message
+                const message = `New menu selection from ${name}\n\n` +
+                    `Contact: ${contactNumber}\n` +
+                    `Booking Date: ${bookingDate}\n` +
+                    `Adults: ${adultCount}\n` +
+                    `Kids: ${kidCount}\n\n` +
+                    `Selected Menu:\n${formattedItems}`;
+
+                // Encode the message for URL
+                const encodedMessage = encodeURIComponent(message);
+
+                // Replace with your WhatsApp number (include country code)
+                const whatsappNumber = '60123456789'; // Replace with your actual WhatsApp number
+
+                // Create WhatsApp URL
+                const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+                // Open WhatsApp in a new tab
+                window.open(whatsappUrl, '_blank');
+            } catch (error) {
+                console.error('Error preparing WhatsApp message:', error);
+                alert(error.message || 'Failed to prepare WhatsApp message. Please try again.');
+            }
+        }
+
+        // Add click event listener to the WhatsApp button
+        document.getElementById('send-whatsapp').addEventListener('click', sendWhatsApp);
     </script>
 </body>
 </html>
