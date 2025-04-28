@@ -566,8 +566,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="kid-count">Number of Kids: (age 12 or below)</label>
-                    <select id="kid-count" name="kid-count" required>
+                    <label for="kid-count">Number of Kids: (age 5 to 12)</label>
+                    <select id="kid-count" name="kid-count">
+                        <option value="0" selected>0</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="toddler-count">Number of Toddlers: (age 4 or below)</label>
+                    <select id="toddler-count" name="toddler-count">
                         <option value="0" selected>0</option>
                     </select>
                 </div>
@@ -1154,6 +1161,15 @@
                 option.textContent = i;
                 kidSelect.appendChild(option);
             }
+
+            // Setup toddler count select
+            const toddlerSelect = document.getElementById('toddler-count');
+            for (let i = 1; i <= 9; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                toddlerSelect.appendChild(option);
+            }
         }
 
         function handleCourseCountChange(event) {
@@ -1293,11 +1309,12 @@
                 const contactNumber = document.getElementById('contact-number').value;
                 const bookingDate = document.getElementById('booking-date').value;
                 const adultCount = document.getElementById('adult-count').value;
-                const kidCount = document.getElementById('kid-count').value;
+                const kidCount = document.getElementById('kid-count').value || '0';
+                const toddlerCount = document.getElementById('toddler-count').value || '0';
                 const courseCount = document.getElementById('course-count').value;
 
                 // Validate required fields
-                if (!name || !contactNumber || !bookingDate || !adultCount || !kidCount || !courseCount) {
+                if (!name || !contactNumber || !bookingDate || !adultCount || !courseCount) {
                     throw new Error('Please fill in all required fields');
                 }
 
@@ -1320,10 +1337,11 @@
                     booking_date: bookingDate,
                     adult_count: adultCount,
                     kid_count: kidCount,
+                    toddler_count: toddlerCount,
                     course_count: courseCountDisplay,
                     menu_price: menuPriceDisplay,
                     selected_items: formattedItems,
-                    message: `New menu selection from ${name}\n\nContact: ${contactNumber}\nBooking Date: ${bookingDate}\nAdults: ${adultCount}\nKids: ${kidCount}\n\nSelected Menu:\n${formattedItems}`
+                    message: `New menu selection from ${name}\n\nContact: ${contactNumber}\nBooking Date: ${bookingDate}\nAdults: ${adultCount}\nKids: ${kidCount}\nToddlers: ${toddlerCount}\n\nSelected Menu:\n${formattedItems}`
                 };
 
                 console.log('Sending email with params:', templateParams);
@@ -1356,11 +1374,12 @@
                 const contactNumber = document.getElementById('contact-number').value;
                 const bookingDate = document.getElementById('booking-date').value;
                 const adultCount = document.getElementById('adult-count').value;
-                const kidCount = document.getElementById('kid-count').value;
+                const kidCount = document.getElementById('kid-count').value || '0';
+                const toddlerCount = document.getElementById('toddler-count').value || '0';
                 const courseCount = document.getElementById('course-count').value;
 
                 // Validate required fields
-                if (!name || !contactNumber || !bookingDate || !adultCount || !kidCount || !courseCount) {
+                if (!name || !contactNumber || !bookingDate || !adultCount || !courseCount) {
                     throw new Error('Please fill in all required fields');
                 }
 
@@ -1380,6 +1399,7 @@
                 const message = `Hi, this is *${name}* regarding my menu selection for ${bookingDate}...\n\n` +
                     `*#Adults:* ${adultCount}\n` +
                     `*#Kids:* ${kidCount}\n` +
+                    `*#Toddlers:* ${toddlerCount}\n` +
                     `*Selected Menu:* ${courseCount} course menu ($${currentMenuPrice})\n\n` +
                     `And here are my choices for the different courses:\n\n${formattedItems}`;
 
@@ -1416,6 +1436,7 @@
             document.getElementById('booking-date').value = '2024-04-01';
             document.getElementById('adult-count').value = '4';
             document.getElementById('kid-count').value = '2';
+            document.getElementById('toddler-count').value = '1';
             document.getElementById('course-count').value = '6';
 
             // Trigger course count change to update the display
