@@ -1283,11 +1283,57 @@
             });
         }
 
+        // Function to check form validity and update button states
+        function updateButtonStates() {
+            const name = document.getElementById('customer-name').value;
+            const contactNumber = document.getElementById('contact-number').value;
+            const bookingDate = document.getElementById('booking-date').value;
+            const adultCount = document.getElementById('adult-count').value;
+            const courseCount = document.getElementById('course-count').value;
+
+            const isValid = name && contactNumber && bookingDate && adultCount && courseCount;
+
+            // Update all email and WhatsApp buttons
+            const emailButtons = document.querySelectorAll('.send-email-btn');
+            const whatsappButtons = document.querySelectorAll('.whatsapp-btn');
+
+            emailButtons.forEach(button => {
+                button.disabled = !isValid;
+            });
+
+            whatsappButtons.forEach(button => {
+                button.disabled = !isValid;
+            });
+        }
+
+        // Add event listeners to required fields
+        function setupFormValidation() {
+            const requiredFields = [
+                'customer-name',
+                'contact-number',
+                'booking-date',
+                'adult-count',
+                'course-count'
+            ];
+
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', updateButtonStates);
+                    field.addEventListener('change', updateButtonStates);
+                }
+            });
+
+            // Initial check
+            updateButtonStates();
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             console.log('DOM Content Loaded, initializing menu...');
             setupDatePicker();
             setupNumberSelects();
             setupCourseCount();
+            setupFormValidation();
             initializeMenu();
             initializeSelectionCounts();
             
