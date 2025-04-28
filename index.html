@@ -523,6 +523,16 @@
     <div class="container">
         <h1>Build Your Custom Dinner Menu</h1>
         
+        <!-- Development Only - Start -->
+        <div class="dev-tools" style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+            <button id="test-data" class="test-btn">Populate Test Data</button>
+            <div class="button-group" style="margin-top: 10px;">
+                <button id="send-email-top" class="send-email-btn">Send Menu Selection (Top)</button>
+                <button id="send-whatsapp-top" class="whatsapp-btn">Send via WhatsApp (Top)</button>
+            </div>
+        </div>
+        <!-- Development Only - End -->
+
         <!-- Move the booking form here, right after the title -->
         <div class="booking-form">
             <!-- Development Only - Start -->
@@ -1335,6 +1345,9 @@
         // Add click event listener to the send email button
         document.getElementById('send-email').addEventListener('click', sendEmail);
 
+        // Add click event listener to the top send email button
+        document.getElementById('send-email-top').addEventListener('click', sendEmail);
+
         // Function to send WhatsApp message
         function sendWhatsApp() {
             try {
@@ -1390,6 +1403,9 @@
 
         // Add click event listener to the WhatsApp button
         document.getElementById('send-whatsapp').addEventListener('click', sendWhatsApp);
+
+        // Add click event listener to the top WhatsApp button
+        document.getElementById('send-whatsapp-top').addEventListener('click', sendWhatsApp);
 
         // Development Only - Start
         function populateTestData() {
