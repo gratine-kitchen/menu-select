@@ -192,6 +192,13 @@
             font-weight: bold;
         }
 
+        /* Add styles for required field asterisk */
+        .required-field::after {
+            content: " *";
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
         /* New styles for the first two form groups */
         .form-group:nth-child(1) input, /* Your name */
         .form-group:nth-child(2) input, /* Booking date */
@@ -542,24 +549,24 @@
             <!-- Development Only - End -->
 
             <div class="form-group">
-                <label for="customer-name">Your name:</label>
+                <label for="customer-name" class="required-field">Your name:</label>
                 <input type="text" id="customer-name" name="customer-name" required>
             </div>
 
             <div class="form-group">
-                <label for="contact-number">Your contact number:</label>
+                <label for="contact-number" class="required-field">Your contact number:</label>
                 <input type="tel" id="contact-number" name="contact-number" required>
             </div>
 
             <div class="form-group">
-                <label for="booking-date">Booking date:</label>
+                <label for="booking-date" class="required-field">Booking date:</label>
                 <input type="date" id="booking-date" name="booking-date" required>
                 <span class="error-message" id="date-error"></span>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="adult-count">Number of Adults:</label>
+                    <label for="adult-count" class="required-field">Number of Adults:</label>
                     <select id="adult-count" name="adult-count" required>
                         <option value="" disabled selected>Select number of adults</option>
                     </select>
@@ -582,7 +589,7 @@
 
             <!-- First, update the course count dropdown to have a proper initial value -->
             <div class="form-group course-count-group">
-                <label for="course-count">Number of Courses:</label>
+                <label for="course-count" class="required-field">Number of Courses:</label>
                 <select id="course-count" name="course-count" required>
                     <option value="5" selected>5 Course Menu - 2 starters ($588)</option>
                     <option value="6">6 Course Menu - 3 starters ($638)</option>
