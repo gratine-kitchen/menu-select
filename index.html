@@ -225,9 +225,23 @@
             outline: none;
         }
 
-        /* Remove the form-row styles since we're not using them anymore */
-        .form-row {
-            display: block;
+        /* Add styles for the divider */
+        .form-divider {
+            margin: 20px 0;
+            border-top: 1px solid #e0e0e0;
+            position: relative;
+        }
+
+        .form-divider::before {
+            /* content: "Guest Information"; */
+            position: absolute;
+            top: -10px;
+            left: 0;
+            background-color: white;
+            padding: 0 10px;
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
         }
 
         .error-message {
@@ -570,6 +584,8 @@
                 <span class="error-message" id="date-error"></span>
             </div>
 
+            <div class="form-divider"></div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="adult-count" class="required-field">Number of Adults:</label>
@@ -602,7 +618,6 @@
                     <option value="7">7 Course Menu - 4 starters ($688)</option>
                     <option value="8">8 Course Menu - 5 starters ($728)</option>
                 </select>
-                <p class="helper-text">Base menu price includes all standard dishes. Upgrade charges will be added to the total.</p>
             </div>
         </div>
         
