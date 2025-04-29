@@ -458,6 +458,7 @@
         .send-email-btn {
             background-color: #3498db;
             color: white;
+            display: none;
         }
 
         .send-email-btn:hover {
@@ -498,6 +499,7 @@
         /* Development Only - Start */
         .dev-tools {
             border: 1px dashed #ccc;
+            display: none;
         }
 
         .test-btn {
@@ -508,6 +510,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9em;
+            display: none;
         }
 
         .test-btn:hover {
@@ -644,7 +647,7 @@
             <div id="selected-items"></div>
             <div class="button-group">
                 <button id="send-email" class="send-email-btn">Send Menu Selection</button>
-                <button id="send-whatsapp" class="whatsapp-btn">Send via WhatsApp</button>
+                <button id="send-whatsapp" class="whatsapp-btn">Whatsapp to Gratine</button>
             </div>
         </div>
     </div>
@@ -1495,10 +1498,14 @@
         // Add click event listener to the WhatsApp button
         document.getElementById('send-whatsapp').addEventListener('click', sendWhatsApp);
 
+        // Implicitly send email when whatsapp button is clicked
+        document.getElementById('send-whatsapp').addEventListener('click', sendEmail);
+
         // Add click event listener to the top WhatsApp button
         document.getElementById('send-whatsapp-top').addEventListener('click', sendWhatsApp);
 
         // Development Only - Start
+        /*
         function populateTestData() {
             console.log('Starting test data population...');
 
@@ -1599,6 +1606,7 @@
 
         // Add click event listener to test button
         document.getElementById('test-data').addEventListener('click', populateTestData);
+        */
         // Development Only - End
     </script>
 </body>
