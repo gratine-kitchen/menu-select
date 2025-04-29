@@ -225,23 +225,9 @@
             outline: none;
         }
 
-        /* Add styles for the divider */
-        .form-divider {
-            margin: 20px 0;
-            border-top: 1px solid #e0e0e0;
-            position: relative;
-        }
-
-        .form-divider::before {
-            /* content: "Guest Information"; */
-            position: absolute;
-            top: -10px;
-            left: 0;
-            background-color: white;
-            padding: 0 10px;
-            color: #666;
-            font-size: 0.9em;
-            font-style: italic;
+        /* Remove the form-row styles since we're not using them anymore */
+        .form-row {
+            display: block;
         }
 
         .error-message {
@@ -481,7 +467,7 @@
         .whatsapp-btn {
             background-color: #25D366;
             color: white;
-            display: none; /* Hide by default */
+            /* display: none; Hide by default */
         }
 
         .whatsapp-btn:hover {
@@ -495,34 +481,21 @@
 
         /* Show WhatsApp button only on mobile devices */
         @media (max-width: 768px) {
-            .send-email-btn {
-                display: none;
-            }
-            
             .whatsapp-btn {
                 display: inline-block;
-                max-width: 100%;
             }
             
             .button-group {
                 flex-direction: column;
                 align-items: center;
             }
-        }
 
-        /* Show email button only on desktop */
-        @media (min-width: 769px) {
-            .whatsapp-btn {
-                display: none;
-            }
-            
-            .send-email-btn {
-                display: inline-block;
+            .send-email-btn, .whatsapp-btn {
+                max-width: 100%;
             }
         }
 
         /* Development Only - Start */
-        /*
         .dev-tools {
             border: 1px dashed #ccc;
         }
@@ -540,7 +513,6 @@
         .test-btn:hover {
             background-color: #5a6268;
         }
-        */
         /* Development Only - End */
     </style>
     <!-- Add Papa Parse library -->
@@ -559,7 +531,6 @@
         <h1>Build Your Custom Dinner Menu</h1>
         
         <!-- Development Only - Start -->
-        <!--
         <div class="dev-tools" style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
             <button id="test-data" class="test-btn">Populate Test Data</button>
             <div class="button-group" style="margin-top: 10px;">
@@ -567,17 +538,14 @@
                 <button id="send-whatsapp-top" class="whatsapp-btn">Send via WhatsApp (Top)</button>
             </div>
         </div>
-        -->
         <!-- Development Only - End -->
 
         <!-- Move the booking form here, right after the title -->
         <div class="booking-form">
             <!-- Development Only - Start -->
-            <!--
             <div class="dev-tools" style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
                 <button id="test-data" class="test-btn">Populate Test Data</button>
             </div>
-            -->
             <!-- Development Only - End -->
 
             <div class="form-group">
@@ -595,8 +563,6 @@
                 <input type="date" id="booking-date" name="booking-date" required>
                 <span class="error-message" id="date-error"></span>
             </div>
-
-            <div class="form-divider"></div>
 
             <div class="form-row">
                 <div class="form-group">
@@ -630,6 +596,7 @@
                     <option value="7">7 Course Menu - 4 starters ($688)</option>
                     <option value="8">8 Course Menu - 5 starters ($728)</option>
                 </select>
+                <p class="helper-text">Base menu price includes all standard dishes. Upgrade charges will be added to the total.</p>
             </div>
         </div>
         
@@ -1532,7 +1499,6 @@
         document.getElementById('send-whatsapp-top').addEventListener('click', sendWhatsApp);
 
         // Development Only - Start
-        /*
         function populateTestData() {
             console.log('Starting test data population...');
 
@@ -1633,7 +1599,6 @@
 
         // Add click event listener to test button
         document.getElementById('test-data').addEventListener('click', populateTestData);
-        */
         // Development Only - End
     </script>
 </body>
