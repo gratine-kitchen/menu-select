@@ -1022,9 +1022,10 @@
             const servingStyle = document.querySelector('input[name="serving-style"]:checked').value;
             currentServingStyle = servingStyle;
 
-            // Update max selections based on serving style
+            // Update max selections based on serving style and adult count
             if (servingStyle === 'sharing') {
-                courseConfig.mains.maxSelections = 1; // Simplified as requested
+                const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+                courseConfig.mains.maxSelections = adultCount >= 10 ? 2 : 1;
             } else {
                 courseConfig.mains.maxSelections = 2; // Default for individual
             }
@@ -1069,6 +1070,14 @@
                 // Update the summary section
                 updateSummary();
             });
+        });
+
+        // Add event listener for adult count change
+        document.getElementById('adult-count').addEventListener('change', () => {
+            // Only update if Family Style Sharing is selected
+            if (currentServingStyle === 'sharing') {
+                updateMainCourseDisplay();
+            }
         });
 
         // Initialize the selected state
