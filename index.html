@@ -1358,10 +1358,26 @@
             initializeMenu();
             initializeSelectionCounts();
             
+            // Pre-populate form fields for testing
+            document.getElementById('customer-name').value = 'Tester';
+            document.getElementById('contact-number').value = '12345678';
+            
+            // Set booking date to today + 2 days
+            const twoDaysFromNow = new Date();
+            twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+            const formattedDate = twoDaysFromNow.toISOString().split('T')[0];
+            document.getElementById('booking-date').value = formattedDate;
+            
+            // Set number of adults to 6
+            document.getElementById('adult-count').value = '6';
+            
             // Trigger the course count change event to initialize the display
             const courseCountSelect = document.getElementById('course-count');
             const event = new Event('change');
             courseCountSelect.dispatchEvent(event);
+            
+            // Trigger form validation to update button states
+            updateButtonStates();
             
             updateSummary();
         });
