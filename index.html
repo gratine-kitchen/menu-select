@@ -620,7 +620,7 @@
 
         <div class="course-section">
             <h2 class="course-title">Main Courses</h2>
-            <p class="course-description">For the main course of meat, you have the option of individual plating or family-style. While individual plating is more common, you may want to consider family-style if people want to taste more than 1 dish... as multiple meat items will be served on a platter for sharing.</p>
+            <p class="course-description">For the main course, you have the option of individual plating or family-style. While individual plating is more common... family-style sharing can be more cozy with dish such as Signature Meat Platter where everyone can savor more than one choice of meat.</p>
             <div class="serving-style-selection">
                 <label class="radio-label">
                     <input type="radio" name="serving-style" value="individual" checked>
@@ -630,6 +630,9 @@
                     <input type="radio" name="serving-style" value="sharing">
                     <span>Family-Style Sharing</span>
                 </label>
+            </div>
+            <div id="sharing-helper-text" class="helper-text" style="display: none; margin-top: 10px; color: #666; font-style: italic;">
+                (With more than 8 adult guests, 2 dishes can be selected for sharing.)
             </div>
             <div class="selection-count" id="mains-count"></div>
             <div class="menu-items" id="mains"></div>
@@ -1026,7 +1029,7 @@
             // Update max selections based on serving style and adult count
             if (servingStyle === 'sharing') {
                 const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
-                courseConfig.mains.maxSelections = adultCount >= 10 ? 2 : 1;
+                courseConfig.mains.maxSelections = adultCount > 8 ? 2 : 1;
             } else {
                 courseConfig.mains.maxSelections = 2; // Default for individual
             }
@@ -1059,6 +1062,11 @@
                     checkedLabel.classList.add('selected');
                 }
                 
+                // Show/hide helper text based on serving style
+                const helperText = document.getElementById('sharing-helper-text');
+                const isSharing = document.querySelector('input[name="serving-style"]:checked').value === 'sharing';
+                helperText.style.display = isSharing ? 'block' : 'none';
+                
                 // Clear all mains selections regardless of which style is selected
                 selectedItems.mains = [];
                 
@@ -1078,15 +1086,23 @@
             // Only update if Family Style Sharing is selected
             if (currentServingStyle === 'sharing') {
                 updateMainCourseDisplay();
+                // Update helper text visibility
+                const helperText = document.getElementById('sharing-helper-text');
+                helperText.style.display = 'block';
             }
         });
 
-        // Initialize the selected state
+        // Initialize the selected state and helper text
         window.addEventListener('DOMContentLoaded', () => {
             const checkedLabel = document.querySelector('input[name="serving-style"]:checked').closest('.radio-label');
             if (checkedLabel) {
                 checkedLabel.classList.add('selected');
             }
+            
+            // Initialize helper text visibility
+            const helperText = document.getElementById('sharing-helper-text');
+            const isSharing = document.querySelector('input[name="serving-style"]:checked').value === 'sharing';
+            helperText.style.display = isSharing ? 'block' : 'none';
         });
 
         async function initializeMenu() {
