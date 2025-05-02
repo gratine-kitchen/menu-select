@@ -861,7 +861,8 @@
                     description: row.Description || '',
                     image: getDirectImageUrl(row['Image URL']),
                     upgradePrice: parseFloat(row['Upgrade Price']) || 0,
-                    servingStyle: (row['Serving Style'] || 'individual').toLowerCase().trim() // Normalize serving style
+                    servingStyle: (row['Serving Style'] || 'individual').toLowerCase().trim(), // Normalize serving style
+                    isSignature: row.IsSignature?.toUpperCase() === 'TRUE' || row.IsSignature?.toUpperCase() === 'YES' || row.IsSignature === '1'
                 };
 
                 const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
@@ -890,7 +891,7 @@
             div.innerHTML = `
                 <input type="checkbox" id="item-${item.id}" ${selectedItems[category].includes(item) ? 'checked' : ''}>
                 <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/150x150'" class="menu-image">
-                <h3>${item.name}</h3>
+                <h3>${item.name}${item.isSignature ? ' ⭐' : ''}</h3>
                 <p>${item.description}</p>
                 ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)} (per guest)</p>` : ''}
             `;
