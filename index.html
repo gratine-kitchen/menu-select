@@ -1057,28 +1057,17 @@
                     checkedLabel.classList.add('selected');
                 }
                 
-                // Store current selections
-                const currentSelections = [...selectedItems.mains];
+                // Clear all mains selections regardless of which style is selected
+                selectedItems.mains = [];
                 
                 // Update display
                 updateMainCourseDisplay();
                 
-                // Restore selections if they exist in the new serving style
-                if (currentSelections.length > 0) {
-                    const newItems = window.menuData.mains[currentServingStyle];
-                    currentSelections.forEach(selection => {
-                        const matchingItem = newItems.find(item => item.id === selection.id);
-                        if (matchingItem) {
-                            const element = document.querySelector(`#mains .menu-item[data-id="${matchingItem.id}"]`);
-                            if (element) {
-                                element.classList.add('selected');
-                                element.querySelector('input[type="checkbox"]').checked = true;
-                            }
-                        }
-                    });
-                }
-                
+                // Update selection count
                 updateSelectionCount('mains');
+                
+                // Update the summary section
+                updateSummary();
             });
         });
 
