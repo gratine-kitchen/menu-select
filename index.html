@@ -531,7 +531,8 @@
     </div>
 
     <div class="container">
-        <h1>Build Your Custom Dinner Menu</h1>
+        <h1>Gratine Menu Builder v1.0</h1>
+        <h2 style="text-align: center; color: #666; font-size: 1.2em; margin-top: -35px; margin-bottom: 30px;">(developed by the chef ;-)</h2>
         
         <!-- Development Only - Start -->
         <div class="dev-tools" style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
@@ -592,14 +593,13 @@
 
             <!-- First, update the course count dropdown to have a proper initial value -->
             <div class="form-group course-count-group">
-                <label for="course-count" class="required-field">Number of Courses:</label>
+                <label for="course-count" class="required-field">Please choose the number of menu courses:</label>
                 <select id="course-count" name="course-count" required>
                     <option value="5" selected>5 Course Menu - 2 starters ($588)</option>
                     <option value="6">6 Course Menu - 3 starters ($638)</option>
                     <option value="7">7 Course Menu - 4 starters ($688)</option>
                     <option value="8">8 Course Menu - 5 starters ($728)</option>
                 </select>
-                <p class="helper-text">Base menu price includes all standard dishes. Upgrade charges will be added to the total.</p>
             </div>
         </div>
         
@@ -613,7 +613,7 @@
 
         <div class="course-section">
             <h2 class="course-title">Starters</h2>
-            <p class="course-description">Our starters are mainly designed to be shared and everyone will be served the same. We have a large variety of starters... you can savor more of them by choosing menu with more courses. :-)</p>
+            <p class="course-description">Our starters are mainly designed to be shared and everyone will be served the same. We have quite a large variety of starters... you can savor more of them by choosing menu with more courses. :-)</p>
             <div class="selection-count" id="starters-count"></div>
             <div class="menu-items" id="starters"></div>
         </div>
