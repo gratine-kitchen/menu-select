@@ -995,10 +995,10 @@
                 
                 if (Array.isArray(items)) {
                     items.forEach(item => {
-                        html += `<p>- ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
+                        html += `<p>• ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
                     });
                 } else {
-                    html += `<p>- ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
+                    html += `<p>• ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
                 }
             });
 
