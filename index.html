@@ -906,11 +906,10 @@
                 }
             });
 
-            // Add click event for image
-            const image = div.querySelector('.menu-image');
-            image.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent checkbox from being toggled
-                showEnlargedImage(item.image);
+            // Add click event for the entire menu item div
+            div.addEventListener('click', () => {
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
             });
 
             return div;
