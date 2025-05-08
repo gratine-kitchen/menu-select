@@ -645,6 +645,44 @@
             <div class="menu-items" id="desserts"></div>
         </div>
 
+        <!-- Add Specifics section -->
+        <div class="course-section">
+            <h2 class="course-title">Specifics</h2>
+            <div class="form-group">
+                <label for="allergies">Is there any food allergies or restrictions we should be aware of?</label>
+                <textarea id="allergies" name="allergies" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="occasion">If this is for any special occassion (e.g. birthday celebration), you can let us know 🙂:</label>
+                <textarea id="occasion" name="occasion" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Special requests (click any that applies):</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="special-requests" value="bigger-portion">
+                        <span>Bigger portion please</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="special-requests" value="lactose-intolerant">
+                        <span>Some guest(s) is vegeterian</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="special-requests" value="vegetarian">
+                        <span>Some guest(s) cannot take diaries such as cheese or cream</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="special-requests" value="high-chair">
+                        <span>Need high chair</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="special-requests" value="others">
+                        <span>Others:</span>
+                        <input type="text" name="special-requests-others" style="margin-left: 10px;">
+                    </label>
+                </div>
+            </div>
+        </div>
         <div class="summary">
             <h2 id="summary-heading">You have selected the <span id="course-count-display">0</span> course menu (<span id="menu-price-display">$0</span>) with the following dishes:</h2>
             <div id="selected-items"></div>
@@ -1396,6 +1434,20 @@
             
             updateSummary();
         });
+
+        // Enable/disable "Others" text input based on checkbox
+        const othersCheckbox = document.querySelector('input[name="special-requests"][value="others"]');
+        const othersTextInput = document.querySelector('input[name="special-requests-others"]');
+
+        if (othersCheckbox && othersTextInput) {
+            othersCheckbox.addEventListener('change', function() {
+                othersTextInput.disabled = !this.checked;
+            });
+
+            // Initialize state on page load
+            othersTextInput.disabled = !othersCheckbox.checked;
+        }
+
 
         // Initialize EmailJS with your public key
         (function() {
