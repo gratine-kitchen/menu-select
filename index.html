@@ -647,13 +647,13 @@
 
         <!-- Add Specifics section -->
         <div class="course-section">
-            <h2 class="course-title">Specifics</h2>
+            <h2 class="course-title">Additional Information</h2>
             <div class="form-group">
                 <label for="allergies">Is there any food allergies or restrictions we should be aware of?</label>
                 <textarea id="allergies" name="allergies" rows="3"></textarea>
             </div>
             <div class="form-group">
-                <label for="occasion">If this is for any special occassion (e.g. birthday celebration), you can let us know 🙂:</label>
+                <label for="occasion">If this is for any special occassion (e.g. birthday celebration 🎂), you can let us know:</label>
                 <textarea id="occasion" name="occasion" rows="3"></textarea>
             </div>
             <div class="form-group">
@@ -1025,6 +1025,13 @@
             let html = '';
 
             Object.entries(courseConfig).forEach(([category, config]) => {
+                if (category === 'specifics') {
+                    // Specifics are handled separately below
+                    return;
+                }
+
+                // Existing course item handling
+
                 const items = selectedItems[category];
                 if (!items || (Array.isArray(items) && items.length === 0)) return;
 
@@ -1038,6 +1045,23 @@
                     html += `<p>• ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
                 }
             });
+
+            // Add specifics to the summary
+            const allergies = document.getElementById('allergies').value;
+            const occasion = document.getElementById('occasion').value;
+            const specialRequests = Array.from(document.querySelectorAll('input[name="special-requests"]:checked'))
+                .map(checkbox => checkbox.nextElementSibling.textContent.trim());
+            const othersRequest = document.querySelector('input[name="special-requests-others"]').value;
+
+            if (allergies) {
+                html += `<p><strong>Allergies/Restrictions:</strong> ${allergies}</p>`;
+            }
+            if (occasion) {
+                html += `<p><strong>Occasion:</strong> ${occasion}</p>`;
+            }
+            if (specialRequests.length > 0 || othersRequest) {
+                html += `<p><strong>Special Requests:</strong> ${specialRequests.filter(req => req !== 'Others:').join(', ')} ${othersRequest ? othersRequest : ''}</p>`;
+            }
 
             summaryElement.innerHTML = html;
         }
@@ -1447,6 +1471,15 @@
             // Initialize state on page load
             othersTextInput.disabled = !othersCheckbox.checked;
         }
+
+        // Add event listeners to Specifics inputs for immediate summary update
+        document.getElementById('allergies').addEventListener('input', updateSummary);
+        document.getElementById('occasion').addEventListener('input', updateSummary);
+        document.querySelectorAll('input[name="special-requests"]').forEach(input => {
+            input.addEventListener('change', updateSummary);
+        });
+        document.querySelector('input[name="special-requests-others"]').addEventListener('input', updateSummary);
+
 
 
         // Initialize EmailJS with your public key
