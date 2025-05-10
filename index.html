@@ -965,7 +965,7 @@
             const selectedCount = selectedItems[category].length;
             const maxCount = config.maxSelections;
             
-            countElement.textContent = `Select ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
+            countElement.textContent = `Select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
             
             // Remove all state classes first
             countElement.classList.remove('error', 'warning', 'success');
@@ -1401,7 +1401,7 @@
                     if (courseConfig[category].required) {
                         const selected = selectedItems[category];
                         if (courseConfig[category].allowMultiple) {
-                            isValid = isValid && (selected && selected.length === courseConfig[category].maxSelections);
+                            isValid = isValid && (selected && selected.length >= 1 && selected.length <= courseConfig[category].maxSelections);
                         } else {
                             isValid = isValid && (selected !== null);
                         }
