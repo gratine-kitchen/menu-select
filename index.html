@@ -946,8 +946,10 @@
 
             // Add click event for the entire menu item div
             div.addEventListener('click', () => {
-                checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event('change'));
+                if (!event.target.matches('input[type="checkbox"]')) {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change'));
+                }
             });
 
             return div;
