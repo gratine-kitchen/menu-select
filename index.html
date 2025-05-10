@@ -1017,6 +1017,7 @@
             }
             
             updateSummary();
+            updateButtonStates(); // Call updateButtonStates after selection changes
         }
 
         function updateSummary() {
@@ -1139,6 +1140,7 @@
                 
                 // Update the summary section
                 updateSummary();
+                updateButtonStates(); // Call updateButtonStates after serving style change
             });
         });
 
@@ -1389,7 +1391,23 @@
             const adultCount = document.getElementById('adult-count').value;
             const courseCount = document.getElementById('course-count').value;
 
-            const isValid = name && contactNumber && bookingDate && adultCount && courseCount;
+            let isValid = name && contactNumber && bookingDate && adultCount && courseCount;
+
+            // Check if required menu items are selected
+            if (isValid) {
+                for (const category in courseConfig) {
+                    if (courseConfig[category].required) {
+                        const selected = selectedItems[category];
+                        if (courseConfig[category].allowMultiple) {
+                            isValid = isValid && (selected && selected.length === courseConfig[category].maxSelections);
+                        } else {
+                            isValid = isValid && (selected !== null);
+                        }
+                        if (!isValid) break; // No need to check further if one category is invalid
+                    }
+                }
+            }
+
 
             // Update all email and WhatsApp buttons
             const emailButtons = document.querySelectorAll('.send-email-btn');
@@ -1459,7 +1477,7 @@
             updateSummary();
         });
 
-        // Enable/disable "Others" text input based on checkbox
+        // Enable/disable "Others" text input based on checkbox in the "Additional Information" section
         const othersCheckbox = document.querySelector('input[name="special-requests"][value="others"]');
         const othersTextInput = document.querySelector('input[name="special-requests-others"]');
 
