@@ -169,8 +169,8 @@
 
         .error {
             color: #e74c3c;
-            text-align: center;
-            padding: 20px;
+            /* text-align: center;
+            padding: 20px; */
         }
 
         .booking-form {
@@ -293,8 +293,8 @@
             border-top: 1px dashed #ddd;
         }
 
-        .selection-count.warning {
-            color: #f39c12;
+        .selection-count.partial-success {
+            color: #27ae60;
         }
 
         .selection-count.error {
@@ -303,6 +303,7 @@
 
         .selection-count.success {
             color: #27ae60;
+            font-weight: bold;
         }
 
         /* Remove the "(Required)" text */
@@ -969,17 +970,22 @@
             const selectedCount = selectedItems[category].length;
             const maxCount = config.maxSelections;
             
-            countElement.textContent = `Select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
+            countElement.textContent = `Please select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
             
             // Remove all state classes first
-            countElement.classList.remove('error', 'warning', 'success');
+            countElement.classList.remove('error', 'partial-success', 'success');
             
+            console.log(`selectedCount: ${selectedCount}, maxCount: ${maxCount}`)
+
             // Add appropriate state class
-            if (selectedCount > maxCount) {
+            if (selectedCount == 0) {
+                console.log('selectedCount == 0');
                 countElement.classList.add('error');
             } else if (selectedCount < maxCount) {
-                countElement.classList.add('warning');
+                console.log('selectedCount < maxCount...');
+                countElement.classList.add('partial-success');
             } else {
+                console.log('else...');
                 countElement.classList.add('success');
             }
 
