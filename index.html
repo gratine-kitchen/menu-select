@@ -978,7 +978,7 @@
             console.log(`selectedCount: ${selectedCount}, maxCount: ${maxCount}`)
 
             // Add appropriate state class
-            if (selectedCount == 0) {
+            if (selectedCount == 0 || selectedCount > maxCount) {
                 console.log('selectedCount == 0');
                 countElement.classList.add('error');
             } else if (selectedCount < maxCount) {
@@ -1323,6 +1323,7 @@
                 courseConfig.mains.maxSelections = 2;
                 courseConfig.desserts.maxSelections = 2;
 
+                /*
                 console.log(`Updated starters max selections to: ${courseConfig.starters.maxSelections}`);
 
                 Object.keys(selectedItems).forEach(category => {
@@ -1335,10 +1336,11 @@
 
                 initializeSelectionCounts();
                 updateSummary();
-
+                
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.classList.remove('selected', 'disabled');
                 });
+                */
 
                 updateAllSelectionCounts();
             } else {
