@@ -1523,15 +1523,32 @@
             initializeSelectionCounts();
             
             // Pre-populate form fields for testing
-            document.getElementById('customer-name').value = 'Tester';
-            document.getElementById('contact-number').value = '12345678';
-            
-            // Set booking date to today + 2 days
-            const twoDaysFromNow = new Date();
-            twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
-            const formattedDate = twoDaysFromNow.toISOString().split('T')[0];
-            document.getElementById('booking-date').value = formattedDate;
-            
+            const urlParams = new URLSearchParams(window.location.search);
+            const customerNameParam = urlParams.get('CustomerName');
+            if (customerNameParam) {
+                document.getElementById('customer-name').value = customerNameParam;
+            } else {
+                document.getElementById('customer-name').value = 'Tester';
+            }
+
+            const contactNumberParam = urlParams.get('ContactNumber');
+            if (contactNumberParam) {
+                document.getElementById('contact-number').value = contactNumberParam;
+            } else {
+                document.getElementById('contact-number').value = '12345678';
+            }
+
+            const bookingDateParam = urlParams.get('BookingDate');
+            if (bookingDateParam) {
+                document.getElementById('booking-date').value = bookingDateParam;
+            } else {
+                // Set booking date to today + 2 days
+                const twoDaysFromNow = new Date();
+                twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
+                const formattedDate = twoDaysFromNow.toISOString().split('T')[0];
+                document.getElementById('booking-date').value = formattedDate;
+            }            
+
             // Set number of adults to 6
             document.getElementById('adult-count').value = '6';
             
