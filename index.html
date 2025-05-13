@@ -1014,6 +1014,12 @@
                 option.textContent = i;
                 selectElement.appendChild(option);
             }
+
+            // Update selected value if it exceeds the new maximum
+            const currentValue = parseInt(selectElement.value);
+            if (currentValue > adultCount) {
+                selectElement.value = adultCount;
+            }
         }
 
         // Function to handle quantity change
@@ -1267,6 +1273,11 @@
                 const helperText = document.getElementById('sharing-helper-text');
                 helperText.style.display = 'block';
             }
+            
+            // Update quantity dropdowns for all menu items
+            document.querySelectorAll('.menu-item').forEach(menuItem => {
+                updateQuantityDropdown(menuItem);
+            });
         });
 
         // Initialize the selected state and helper text
