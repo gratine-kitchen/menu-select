@@ -580,6 +580,7 @@
                         <option value="" disabled selected>Select number of adults</option>
                     </select>
                 </div>
+                <span class="error-message" id="adult-count-error"></span>
 
                 <div class="form-group">
                     <label for="kid-count">Number of Kids 🧒🏻: (age 5 to 12)</label>
@@ -703,6 +704,10 @@
     </div>
 
     <script>
+
+        const MAX_CAPACITY = 18;
+        const MAX_CHILDREN = 9;
+
         // Configuration object for course selections
         const courseConfig = {
             soups: {
@@ -1443,13 +1448,16 @@
             const adultSelect = document.getElementById('adult-count');
             const kidSelect = document.getElementById('kid-count');
 
-            for (let i = 2; i <= 18; i++) {
+
+            // Populate adult count options
+            for (let i = 2; i <= MAX_CAPACITY; i++) {
                 const option = document.createElement('option');
                 option.value = i;
                 option.textContent = i;
                 adultSelect.appendChild(option);
             }
 
+            // Populate kid count options
             for (let i = 1; i <= 9; i++) {
                 const option = document.createElement('option');
                 option.value = i;
@@ -1465,6 +1473,61 @@
                 option.textContent = i;
                 toddlerSelect.appendChild(option);
             }
+
+            // Add event listeners for adult and kid count changes
+            adultSelect.addEventListener('change', validateAdultKidCount);
+            kidSelect.addEventListener('change', validateAdultKidCount);
+
+            // Initial validation
+            validateAdultKidCount();
+        }
+
+        function validateAdultKidCount() {
+            const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+            const kidCount = parseInt(document.getElementById('kid-count').value) || 0;
+            const totalCount = adultCount + kidCount;
+            const errorElement = document.getElementById('adult-count-error');
+
+            if (totalCount > MAX_CAPACITY) {
+                errorElement.textContent = 'The combined number of adults and kids cannot exceed ' + MAX_CAPACITY;
+                // You can also visually indicate the error on the select elements themselves
+                document.getElementById('adult-count').classList.add('error-field');
+                document.getElementById('kid-count').classList.add('error-field');
+            } else {
+                errorElement.textContent = '';
+                document.getElementById('adult-count').classList.remove('error-field');
+                document.getElementById('kid-count').classList.remove('error-field');
+            }
+
+            // Update button states based on validation
+            updateButtonStates();
+        }
+
+        // Add CSS for error indication on select elements
+        const style = document.createElement('style');
+        style.textContent = `
+            .error-field {
+                border-color: #e74c3c !important; /* Red border */
+            }
+        `;
+        document.head.appendChild(style);
+
+        function setupFormValidation() {
+            const requiredFields = [
+                'customer-name',
+                'contact-number',
+                'booking-date',
+                'adult-count',
+                'course-count'
+            ];
+
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', updateButtonStates);
+                    field.addEventListener('change', updateButtonStates);
+                }
+            })
         }
 
         function handleCourseCountChange(event) {
