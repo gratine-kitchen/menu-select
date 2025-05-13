@@ -913,8 +913,9 @@
                     description: row.Description || '',
                     image: getDirectImageUrl(row['Image URL']),
                     upgradePrice: parseFloat(row['Upgrade Price']) || 0,
-                    servingStyle: (row['Serving Style'] || 'individual').toLowerCase().trim(), // Normalize serving style
-                    isSignature: row.IsSignature?.toUpperCase() === 'TRUE' || row.IsSignature?.toUpperCase() === 'YES' || row.IsSignature === '1'
+                    servingStyle: (row['ServingStyle'] || 'individual').toLowerCase().trim(), // Normalize serving style
+                    isSignature: row.IsSignature?.toUpperCase() === 'TRUE' || row.IsSignature?.toUpperCase() === 'YES' || row.IsSignature === '1',
+                    mealAvailability: (row['MealAvailability'] || 'Both').toLowerCase().trim() // Add meal availability
                 };
 
                 const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
@@ -947,6 +948,13 @@
                 <p>${item.description}</p>
                 ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)} (per guest)</p>` : ''}
             `;
+
+            // Conditionally hide items based on meal availability
+            const urlParams = new URLSearchParams(window.location.search);
+            const mealType = (urlParams.get('meal') || 'dinner').toLowerCase(); // Default to dinner
+            if (item.mealAvailability !== 'both' && item.mealAvailability !== mealType) {
+                div.style.display = 'none';
+            }
 
             const checkbox = div.querySelector('input[type="checkbox"]');
             checkbox.addEventListener('change', () => {
@@ -1188,7 +1196,7 @@
 
             if (mealType && mealType.toLowerCase() === 'lunch') {
                 titleElement.textContent = 'Gratine Lunch Menu Composer';
-                populateCourseCountDropdown('lunch');
+                populateCourseCountDropdown('lunch');                
             } else {
                 titleElement.textContent = 'Gratine Dinner Menu Composer';
                 populateCourseCountDropdown('dinner');
