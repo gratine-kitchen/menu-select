@@ -956,7 +956,7 @@
                 ${item.upgradePrice > 0 ? `<class="price-upgrade">(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}
                 </p>`;
 
-            if (category !== 'starters')
+            if (category !== 'starters' && currentServingStyle !== 'sharing')
             {
                 div.innerHTML += quantityDropdown;
 
