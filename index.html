@@ -537,7 +537,7 @@
         </div>
 
         <h1 id="menu-composer-title">Gratine Menu Composer</h1>
-        <h2 style="text-align: center; color: #666; font-size: 1.2em; margin-top: -35px; margin-bottom: 30px;">(developed by the chef 😉)</h2>
+        <h2 style="text-align: center; color: #666; font-size: 1.2em; margin-top: -35px; margin-bottom: 30px;">(developed by the chef 🤓)</h2>
         
         <!-- Development Only - Start -->
         <div class="dev-tools" style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
@@ -1643,15 +1643,11 @@
             const customerNameParam = urlParams.get('CustomerName');
             if (customerNameParam) {
                 document.getElementById('customer-name').value = customerNameParam;
-            } else {
-                document.getElementById('customer-name').value = 'Tester';
             }
 
             const contactNumberParam = urlParams.get('ContactNumber');
             if (contactNumberParam) {
                 document.getElementById('contact-number').value = contactNumberParam;
-            } else {
-                document.getElementById('contact-number').value = '12345678';
             }
 
             const bookingDateParam = urlParams.get('BookingDate');
@@ -1664,9 +1660,6 @@
                 const formattedDate = twoDaysFromNow.toISOString().split('T')[0];
                 document.getElementById('booking-date').value = formattedDate;
             }            
-
-            // Set number of adults to 6
-            document.getElementById('adult-count').value = '6';
             
             // Trigger the course count change event to initialize the display
             const courseCountSelect = document.getElementById('course-count');
