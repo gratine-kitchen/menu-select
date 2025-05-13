@@ -727,7 +727,7 @@
         const selectedItems = Object.keys(courseConfig).reduce((acc, category) => {
             acc[category] = courseConfig[category].allowMultiple ? [] : null;
             return acc;
-        }, {});
+        }, {});        
 
         // Menu prices configuration
         const menuPrices = {
@@ -941,13 +941,24 @@
             div.dataset.id = item.id;
             div.dataset.category = category;
             
+            // Add quantity dropdown (initially hidden)
+            const quantityDropdown = `
+                <select class="quantity-select" data-item-id="${item.id}" style="display: none; position: absolute; bottom: 15px; left: 15px; width: 120px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em;">
+                    <option value="" disabled selected>Specify quantity if you know</option>
+                </select>
+            `;
+
             div.innerHTML = `
                 <input type="checkbox" id="item-${item.id}" ${selectedItems[category].includes(item) ? 'checked' : ''}>
                 <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/150x150'" class="menu-image">
                 <h3>${item.name}${item.isSignature ? ' ⭐' : ''}</h3>
                 <p>${item.description}</p>
                 ${item.upgradePrice > 0 ? `<p class="price-upgrade">+$${item.upgradePrice.toFixed(2)} (per guest)</p>` : ''}
+                ${quantityDropdown}
             `;
+
+            // Initialize quantity dropdown options
+            updateQuantityDropdown(div);
 
             // Conditionally hide items based on meal availability
             const urlParams = new URLSearchParams(window.location.search);
@@ -963,6 +974,12 @@
                 }
             });
 
+            // Add event listener to quantity dropdown
+            const selectElement = div.querySelector('.quantity-select');
+            selectElement.addEventListener('change', (event) => {
+                handleQuantityChange(event, item.id);
+            });
+
             // Add click event for the entire menu item div
             div.addEventListener('click', () => {
                 if (!event.target.matches('input[type="checkbox"]')) {
@@ -972,6 +989,44 @@
             });
 
             return div;
+        }
+
+        // Function to update quantity dropdown options
+        function updateQuantityDropdown(menuItemElement) {
+            const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+            const selectElement = menuItemElement.querySelector('.quantity-select');
+            if (!selectElement) return;
+
+            // Clear existing options
+            selectElement.innerHTML = '<option value="" disabled selected>Specify quantity if you know</option>';
+
+            // Add options from 0 to adultCount
+            for (let i = 0; i <= adultCount; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                selectElement.appendChild(option);
+            }
+        }
+
+        // Function to handle quantity change
+        function handleQuantityChange(event, itemId) {
+            const quantity = parseInt(event.target.value);
+            itemQuantities[itemId] = quantity;
+            updateSummary();
+        }
+
+        // Initialize item quantities object
+        const itemQuantities = {};
+
+        // Function to get quantity for an item
+        function getItemQuantity(itemId) {
+            return itemQuantities[itemId] || 0;
+        }
+
+        // Function to clear item quantities
+        function clearItemQuantities() {
+            Object.keys(itemQuantities).forEach(key => delete itemQuantities[key]);
         }
 
         function updateSelectionCount(category) {
@@ -1018,6 +1073,11 @@
                     element.classList.remove('selected');
                     selectedItems[category] = selectedItems[category].filter(i => i.id !== item.id);
                     element.querySelector('input[type="checkbox"]').checked = false;
+                    // Hide quantity dropdown
+                    element.querySelector('.quantity-select').style.display = 'none';
+                    // Reset quantity
+                    const selectElement = element.querySelector('.quantity-select');
+                    if (selectElement) selectElement.value = "";
                 } else {
                     if (currentSelections < config.maxSelections) {
                         element.classList.add('selected');
@@ -1025,6 +1085,8 @@
                         element.querySelector('input[type="checkbox"]').checked = true;
                     }
                 }
+                // Show quantity dropdown
+                element.querySelector('.quantity-select').style.display = 'block';
                 
                 updateSelectionCount(category);
             } else {
@@ -1032,13 +1094,19 @@
                     el.classList.remove('selected');
                     el.querySelector('input[type="checkbox"]').checked = false;
                 });
+                // Hide quantity dropdown
+                element.querySelector('.quantity-select').style.display = 'none';
                 element.classList.add('selected');
                 element.querySelector('input[type="checkbox"]').checked = true;
                 selectedItems[category] = item;
+                // Show quantity dropdown
+                element.querySelector('.quantity-select').style.display = 'block';
             }
             
             updateSummary();
-            updateButtonStates(); // Call updateButtonStates after selection changes
+
+            // Update button states after selection changes
+            updateButtonStates();
         }
 
         function updateSummary() {
@@ -1058,13 +1126,14 @@
                 if (!items || (Array.isArray(items) && items.length === 0)) return;
 
                 html += `<p><strong>${config.displayName}:</strong></p>`;
-                
+
                 if (Array.isArray(items)) {
                     items.forEach(item => {
-                        html += `<p>• ${item.name} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
+                        const quantity = getItemQuantity(item.id);
+                        html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
                     });
                 } else {
-                    html += `<p>• ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
+                    html += `<p>• ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''} </p>`;
                 }
             });
 
@@ -1152,6 +1221,8 @@
                 
                 // Clear all mains selections regardless of which style is selected
                 selectedItems.mains = [];
+                // Clear quantities
+                clearItemQuantities();
                 
                 // Update display
                 updateMainCourseDisplay();
@@ -1159,7 +1230,6 @@
                 // Update selection count
                 updateSelectionCount('mains');
                 
-                // Update the summary section
                 updateSummary();
                 updateButtonStates(); // Call updateButtonStates after serving style change
             });
@@ -1171,6 +1241,8 @@
             if (currentServingStyle === 'sharing') {
                 updateMainCourseDisplay();
                 // Update helper text visibility
+                updateSummary();
+                updateButtonStates();
                 const helperText = document.getElementById('sharing-helper-text');
                 helperText.style.display = 'block';
             }
@@ -1645,7 +1717,8 @@
                     selected_items: formattedItems,
                     message: `New menu selection from ${name}\n\nContact: ${contactNumber}\nBooking Date: ${bookingDate}\nAdults: ${adultCount}\nKids: ${kidCount}\nToddlers: ${toddlerCount}\n\nSelected Menu:\n${formattedItems}`
                 };
-
+                
+                console.log("Email parameters:", templateParams);
                 console.log('Sending email with params:', templateParams);
 
                 // Send email
@@ -1702,7 +1775,7 @@
                     `*#Adults:* ${adultCount}\n` +
                     `*#Kids:* ${kidCount}\n` +
                     `*#Toddlers:* ${toddlerCount}\n` +
-                    `*Selected Menu:* ${courseCount} course menu ($${currentMenuPrice})\n\n` +
+                    `*Selected Menu:* ${courseCount} course menu (${menuPriceDisplay})\n\n` +
                     `And here are my choices for the different courses:\n\n${formattedItems}`;
 
                 // Encode the message for URL
@@ -1713,6 +1786,8 @@
 
                 // Create WhatsApp URL
                 const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+                console.log("WhatsApp URL:", whatsappUrl);
 
                 // Open WhatsApp in a new tab
                 window.open(whatsappUrl, '_blank');
@@ -1727,114 +1802,6 @@
 
         // Implicitly send email when whatsapp button is clicked
         document.getElementById('send-whatsapp').addEventListener('click', sendEmail);
-
-        // Add click event listener to the top WhatsApp button
-        document.getElementById('send-whatsapp-top').addEventListener('click', sendWhatsApp);
-
-        // Development Only - Start
-        /*
-        function populateTestData() {
-            console.log('Starting test data population...');
-
-            // Populate form fields
-            document.getElementById('customer-name').value = 'John Doe';
-            document.getElementById('contact-number').value = '12345678';
-            document.getElementById('booking-date').value = '2024-04-01';
-            document.getElementById('adult-count').value = '4';
-            document.getElementById('kid-count').value = '2';
-            document.getElementById('toddler-count').value = '1';
-            document.getElementById('course-count').value = '6';
-
-            // Trigger course count change to update the display
-            const courseCountEvent = new Event('change');
-            document.getElementById('course-count').dispatchEvent(courseCountEvent);
-
-            // Function to select menu items
-            function selectMenuItems() {
-                console.log('Selecting menu items...');
-                console.log('Menu data available:', window.menuData);
-
-                // Always select "Individually Served" for mains
-                const individualStyleRadio = document.querySelector('input[name="serving-style"][value="individual"]');
-                if (individualStyleRadio) {
-                    console.log('Selecting individual serving style');
-                    individualStyleRadio.checked = true;
-                    individualStyleRadio.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-
-                const categories = ['soups', 'starters', 'mains', 'desserts'];
-                categories.forEach(category => {
-                    console.log(`Processing category: ${category}`);
-                    const items = Array.from(document.querySelectorAll(`#${category} .menu-item`));
-                    console.log(`Found ${items.length} items in ${category}`);
-
-                    if (items.length > 0) {
-                        // Determine how many items to select based on category and course count
-                        let itemsToSelect = 2; // Default for most categories
-                        if (category === 'starters') {
-                            const courseCount = parseInt(document.getElementById('course-count').value);
-                            switch(courseCount) {
-                                case 5: itemsToSelect = 2; break;
-                                case 6: itemsToSelect = 3; break;
-                                case 7: itemsToSelect = 4; break;
-                                case 8: itemsToSelect = 5; break;
-                                default: itemsToSelect = 2;
-                            }
-                        }
-
-                        // Select the appropriate number of items
-                        items.slice(0, itemsToSelect).forEach((item, index) => {
-                            console.log(`Selecting item ${index + 1} in ${category}`);
-                            // Get the item data from the dataset
-                            const itemId = item.dataset.id;
-                            console.log(`Item ID: ${itemId}`);
-                            
-                            if (window.menuData) {
-                                let itemData;
-                                if (category === 'mains') {
-                                    // For mains, check both individual and sharing items
-                                    itemData = window.menuData.mains.individual.find(i => i.id === itemId) || 
-                                             window.menuData.mains.sharing.find(i => i.id === itemId);
-                                } else {
-                                    itemData = window.menuData[category].find(i => i.id === itemId);
-                                }
-                                
-                                console.log(`Found item data:`, itemData);
-                                
-                                if (itemData) {
-                                    // Call the selectItem function directly
-                                    selectItem(itemData, category, item);
-                                    console.log(`Selected item in ${category}`);
-                                }
-                            } else {
-                                console.log(`No menu data available for ${category}`);
-                            }
-                        });
-                    }
-                });
-            }
-
-            // Wait for menu data to be available
-            const checkMenuData = setInterval(() => {
-                if (window.menuData) {
-                    console.log('Menu data is available, proceeding with selection');
-                    clearInterval(checkMenuData);
-                    // Wait a bit more to ensure DOM is updated
-                    setTimeout(selectMenuItems, 500);
-                }
-            }, 100);
-
-            // Stop checking after 5 seconds to prevent infinite loop
-            setTimeout(() => {
-                clearInterval(checkMenuData);
-                console.log('Menu data check timeout reached');
-            }, 5000);
-        }
-
-        // Add click event listener to test button
-        document.getElementById('test-data').addEventListener('click', populateTestData);
-        */
-        // Development Only - End
     </script>
 </body>
 </html>
