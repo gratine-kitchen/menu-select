@@ -990,8 +990,12 @@
             // Add click event for the entire menu item div
             div.addEventListener('click', () => {
                 if (!event.target.matches('input[type="checkbox"]') && !event.target.matches('select.quantity-select')) {
+
+                    if (!checkbox.disabled)
+                    {
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event('change'));
+                    }
                 }
             });
 
@@ -1071,7 +1075,7 @@
             menuItems.forEach(item => {
                 if (!item.classList.contains('selected')) {
                     item.classList.toggle('disabled', selectedCount >= maxCount);
-                    item.querySelector('input[type="checkbox"]').disabled = selectedCount >= maxCount;
+                    item.querySelector('input[type="checkbox"]').disabled = item.classList.contains('disabled');
                 }
             });
         }
