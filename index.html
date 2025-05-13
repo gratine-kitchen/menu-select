@@ -943,23 +943,26 @@
             
             // Add quantity dropdown (initially hidden)
             const quantityDropdown = `
-                <select class="quantity-select" data-item-id="${item.id}" style="display: none; position: absolute; bottom: 15px; left: 15px; width: 190px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.8em;">
+                <select class="quantity-select" data-item-id="${item.id}" style="display: none; position: absolute; bottom: 15px; left: 15px; width: 190px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.7em;">
                     <option value="" disabled selected>Specify quantity if you know</option>
                 </select>
             `;
 
             div.innerHTML = `
                 <input type="checkbox" id="item-${item.id}" ${selectedItems[category].includes(item) ? 'checked' : ''}>
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/150x150'" class="menu-image" style="margin-bottom: 50px;">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/150x150'" class="menu-image";">
                 <h3>${item.name}${item.isSignature ? ' ⭐' : ''}</h3>
                 <p>${item.description}
                 ${item.upgradePrice > 0 ? `<class="price-upgrade">(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}
-                </p>
-                ${quantityDropdown}
-            `;
+                </p>`;
 
-            // Initialize quantity dropdown options
-            updateQuantityDropdown(div);
+            if (category !== 'starters')
+            {
+                div.innerHTML += quantityDropdown;
+
+                // Initialize quantity dropdown options
+                updateQuantityDropdown(div);
+            }
 
             // Conditionally hide items based on meal availability
             const urlParams = new URLSearchParams(window.location.search);
@@ -977,10 +980,13 @@
 
             // Add event listener to quantity dropdown
             const selectElement = div.querySelector('.quantity-select');
-            selectElement.addEventListener('change', (event) => {
-                handleQuantityChange(event, item.id);
-            });
-
+            if (selectElement != null)
+            {
+                selectElement.addEventListener('change', (event) => {
+                    handleQuantityChange(event, item.id);
+                });
+            }
+ 
             // Add click event for the entire menu item div
             div.addEventListener('click', () => {
                 if (!event.target.matches('input[type="checkbox"]') && !event.target.matches('select.quantity-select')) {
@@ -999,7 +1005,7 @@
             if (!selectElement) return;
 
             // Clear existing options
-            selectElement.innerHTML = '<option value="" disabled selected>Specify quantity if you know</option>';
+            selectElement.innerHTML = '<option value="" disabled selected>[Optional] #Guests having this?</option>';
 
             // Add options from 0 to adultCount
             for (let i = 0; i <= adultCount; i++) {
@@ -1079,14 +1085,8 @@
                     const selectElement = element.querySelector('.quantity-select');
                     if (selectElement)
                     {
-                        console.log('Resetting quantity for item:', item.id);
-                        selectElement.value = "";
+                        // selectElement.value = "";
                         selectElement.style.display = 'none';
-                        selectElement.value = "";
-                    }
-                    else
-                    {
-                        console.log('Quantity select element not found for item:', item.id);
                     }
                 } else {
                     if (currentSelections < config.maxSelections) {
@@ -1095,8 +1095,12 @@
                         element.querySelector('input[type="checkbox"]').checked = true;
                     }
 
-                    // Show quantity dropdown
-                    element.querySelector('.quantity-select').style.display = 'block';
+                    const selectElement = element.querySelector('.quantity-select');
+                    if (selectElement)
+                    {
+                        // Show quantity dropdown
+                        element.querySelector('.quantity-select').style.display = 'block';
+                    }
                 }
                 
                 updateSelectionCount(category);
@@ -1105,13 +1109,19 @@
                     el.classList.remove('selected');
                     el.querySelector('input[type="checkbox"]').checked = false;
                 });
+                
                 // Hide quantity dropdown
-                element.querySelector('.quantity-select').style.display = 'none';
+                //element.querySelector('.quantity-select').style.display = 'none';
+
                 element.classList.add('selected');
                 element.querySelector('input[type="checkbox"]').checked = true;
                 selectedItems[category] = item;
-                // Show quantity dropdown
-                element.querySelector('.quantity-select').style.display = 'block';
+
+                if (category != "starters")
+                {
+                    // Show quantity dropdown
+                    element.querySelector('.quantity-select').style.display = 'block';
+                }
             }
             
             updateSummary();
