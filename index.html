@@ -773,8 +773,8 @@
         // Define course count availability
         let courseCountAvailability = {
             4: { label: '4 Course Lunch Menu - 1 starters ($448)', meals: ['lunch'], isDefault: true },
-            5: { label: '5 Course Menu - 2 starters ($580)', meals: ['both'], isDefault: true },
-            6: { label: '6 Course Menu - 3 starters ($638)', meals: ['both'], isDefault: false },
+            5: { label: '5 Course Menu - 2 starters ($580)', meals: ['both'], isDefault: false },
+            6: { label: '6 Course Menu - 3 starters ($638)', meals: ['both'], isDefault: true },
             7: { label: '7 Course Menu - 4 starters ($688)', meals: ['both'], isDefault: false },
             8: { label: '8 Course Menu - 5 starters ($728)', meals: ['both'], isDefault: false }
         };
@@ -1511,6 +1511,7 @@
         }
 
         function setupDatePicker() {
+            console.log("setupDatePicker");
             const dateInput = document.getElementById('booking-date');
             const tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
@@ -1550,6 +1551,7 @@
             const kidSelect = document.getElementById('kid-count');
 
 
+            console.log("setupNumberSelects");
             // Populate adult count options
             for (let i = 2; i <= MAX_CAPACITY; i++) {
                 const option = document.createElement('option');
@@ -1824,13 +1826,14 @@
             const bookingDateParam = urlParams.get('BookingDate');
             if (bookingDateParam) {
                 document.getElementById('booking-date').value = bookingDateParam;
-            } else {
-                // Set booking date to today + 2 days
-                const twoDaysFromNow = new Date();
-                twoDaysFromNow.setDate(twoDaysFromNow.getDate() + 2);
-                const formattedDate = twoDaysFromNow.toISOString().split('T')[0];
-                document.getElementById('booking-date').value = formattedDate;
-            }            
+            }
+
+            const numAdultsParam = urlParams.get('NumAdults');
+            console.log(`NumAdultsParam: ${numAdultsParam}`);
+            if (numAdultsParam) {
+                console.log(`Setting adult count to ${numAdultsParam}`);
+                document.getElementById('adult-count').value = numAdultsParam;
+            }
             
             // Trigger the course count change event to initialize the display
             const courseCountSelect = document.getElementById('course-count');
