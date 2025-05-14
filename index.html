@@ -246,6 +246,16 @@
             border-color: #e74c3c;
         }
 
+        /* Style for required input fields when blank */
+        input:required:invalid {
+        background-color: #ffffcc; /* Light yellow */
+        } 
+
+        /* Style for required input fields when blank */
+        select:required:invalid {
+        background-color: #ffffcc; /* Light yellow */
+        } 
+
         input[type="date"] {
             font-family: inherit;
         }
@@ -1054,6 +1064,7 @@
                 selectElement.value = 1; // Default to 1 for starters
             }
 
+            clearItemQuantities();
         }
 
         // Function to handle quantity change
@@ -1119,6 +1130,7 @@
                 
                 if (isSelected) {
                     element.classList.remove('selected');
+                    element.classList.remove('error');
                     selectedItems[category] = selectedItems[category].filter(i => i.id !== item.id);
                     element.querySelector('input[type="checkbox"]').checked = false;
 
