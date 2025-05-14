@@ -611,6 +611,7 @@
             <p class="course-description">You can select up to 2 soup items for your guests to choose from...</p>
             <div class="selection-count" id="soups-count"></div>
             <div class="menu-items" id="soups"></div>
+            <span class="error-message" id="soups-quantity-error"></span>
         </div>
 
         <div class="course-section">
@@ -618,6 +619,7 @@
             <p class="course-description">Our starters are mainly designed to be shared and everyone will be served the same. We have quite a large variety of starters... you can savor more of them by choosing menu with more courses. :-)</p>
             <div class="selection-count" id="starters-count"></div>
             <div class="menu-items" id="starters"></div>
+            <span class="error-message" id="starters-quantity-error"></span>
         </div>
 
         <div class="course-section">
@@ -638,6 +640,7 @@
             </div>
             <div class="selection-count" id="mains-count"></div>
             <div class="menu-items" id="mains"></div>
+            <span class="error-message" id="mains-quantity-error"></span>
         </div>
 
         <div class="course-section">
@@ -645,6 +648,7 @@
             <p class="course-description">You can select up to 2 dessert items for your guests to choose from...</p>
             <div class="selection-count" id="desserts-count"></div>
             <div class="menu-items" id="desserts"></div>
+            <span class="error-message" id="desserts-quantity-error"></span>
         </div>
 
         <!-- Add Specifics section -->
@@ -1021,7 +1025,7 @@
             const selectElement = menuItemElement.querySelector('.quantity-select');
             if (!selectElement) return;
 
-            // Clear existing options and add default option
+            // Clear existing options and add default option (if not starters)
             selectElement.innerHTML = '<option value="" disabled selected>[Optional] #Guests having this?</option>';
 
             // Add options from 0 to adultCount
@@ -1032,15 +1036,24 @@
                 selectElement.appendChild(option);
             }
 
-            // Update selected value if it exceeds the new maximum
-            const currentValue = parseInt(selectElement.value);
-            if (currentValue > adultCount) {
-                selectElement.value = adultCount;
+            // Update selected value if it exceeds the new maximum (and not starters)
+            if (menuItemElement.dataset.category !== 'starters') {
+                const currentValue = parseInt(selectElement.value);
+                if (currentValue > adultCount) {
+                    selectElement.value = adultCount;
+                }
             }
+
+            // If it's starters and there's a selected value, keep it
+            if (menuItemElement.dataset.category === 'starters' && selectElement.value === "") {
+                selectElement.value = 1; // Default to 1 for starters
+            }
+
         }
 
         // Function to handle quantity change
         function handleQuantityChange(event, itemId) {
+            const category = event.target.closest('.menu-item').dataset.category;
             const quantity = parseInt(event.target.value);
             itemQuantities[itemId] = quantity;
             updateSummary();
@@ -1108,7 +1121,6 @@
                     const selectElement = element.querySelector('.quantity-select');
                     if (selectElement)
                     {
-                        // selectElement.value = "";
                         selectElement.style.display = 'none';
                     }
                 } else {
@@ -1135,6 +1147,11 @@
                 
                 // Hide quantity dropdown
                 //element.querySelector('.quantity-select').style.display = 'none';
+                // const selectElement = element.querySelector('.quantity-select');
+                // if (selectElement) {
+                //     // Force a visual update
+                //     selectElement.dispatchEvent(new Event('change'));
+                // }
 
                 element.classList.add('selected');
                 element.querySelector('input[type="checkbox"]').checked = true;
@@ -1144,7 +1161,7 @@
                 {
                     // Show quantity dropdown
                     element.querySelector('.quantity-select').style.display = 'block';
-                }
+                }                
             }
             
             updateSummary();
@@ -1155,10 +1172,11 @@
 
         function updateSummary() {
             const summaryElement = document.getElementById('selected-items');
-            
+            const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
             let html = '';
 
             Object.entries(courseConfig).forEach(([category, config]) => {
+                const categoryDisplayName = config.displayName;
                 if (category === 'specifics') {
                     // Specifics are handled separately below
                     return;
@@ -1169,17 +1187,38 @@
                 const items = selectedItems[category];
                 if (!items || (Array.isArray(items) && items.length === 0)) return;
 
-                html += `<p><strong>${config.displayName}:</strong></p>`;
+                html += `<p><strong>${categoryDisplayName}:</strong></p>`;
 
                 if (Array.isArray(items)) {
+                    let totalQuantity = 0;
                     items.forEach(item => {
-                        const quantity = getItemQuantity(item.id);
-                        html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
+                        if (!item.disabled)
+                        {
+                            const quantity = getItemQuantity(item.id);
+                            totalQuantity += quantity;
+                            html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''} </p>`;
+                        }
                     });
+
+                    // Check if total quantity exceeds adult count
+                    const errorElement = document.getElementById(`${category}-quantity-error`);
+                    if (totalQuantity > adultCount) {
+                        errorElement.textContent = `Total quantity exceeds the number of adults (${adultCount}).`;
+                        errorElement.style.display = 'block';
+                    } else {
+                        errorElement.textContent = '';
+                        errorElement.style.display = 'none';
+                    }
                 } else {
-                    html += `<p>• ${items.name} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''} </p>`;
+                    const quantity = getItemQuantity(items.id);
+                    html += `<p>• ${items.name} ${quantity > 0 ? `(x${quantity})` : ''} ${items.upgradePrice > 0 ? `(+$${items.upgradePrice.toFixed(2)} per guest)` : ''} </p>`;
                 }
             });
+
+            // Validate quantities and update button states
+            validateQuantities();
+            updateButtonStates();
+
 
             // Add specifics to the summary
             const allergies = document.getElementById('allergies').value;
@@ -1200,6 +1239,43 @@
 
             summaryElement.innerHTML = html;
         }
+
+        function validateQuantities() {
+            const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+            let isValid = true;
+
+            Object.entries(courseConfig).forEach(([category, config]) => {
+                if (config.allowMultiple) {
+                    const items = selectedItems[category];
+                    if (items && Array.isArray(items)) {
+                        let totalQuantity = 0;
+                        items.forEach(item => {
+                            totalQuantity += getItemQuantity(item.id);
+                        });
+
+                        const errorElement = document.getElementById(`${category}-quantity-error`);
+                        if (totalQuantity > adultCount) {
+                            errorElement.textContent = `Total quantity for ${config.displayName} (${totalQuantity}) exceeds the number of adults (${adultCount}).`;
+                            errorElement.style.display = 'block';
+                            isValid = false;
+                        } else {
+                            errorElement.textContent = '';
+                            errorElement.style.display = 'none';
+                        }
+                    }
+                }
+            });
+
+            return isValid;
+        }
+
+        // Add CSS for error messages
+        const style = document.createElement('style');
+        style.textContent += `
+            .error-message {
+                display: none; /* Initially hidden */
+            }
+        `;
 
         function initializeSelectionCounts() {
             Object.keys(courseConfig).forEach(category => {
@@ -1504,7 +1580,6 @@
         }
 
         // Add CSS for error indication on select elements
-        const style = document.createElement('style');
         style.textContent = `
             .error-field {
                 border-color: #e74c3c !important; /* Red border */
@@ -1647,7 +1722,7 @@
             const adultCount = document.getElementById('adult-count').value;
             const courseCount = document.getElementById('course-count').value;
 
-            let isValid = name && contactNumber && bookingDate && adultCount && courseCount;
+            let isValid = name && contactNumber && bookingDate && adultCount && courseCount && validateQuantities();
 
             // Check if required menu items are selected
             if (isValid) {
