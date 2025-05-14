@@ -77,6 +77,11 @@
             background-color: #f1f8e9;
         }
 
+        /* Add error state for menu item */
+        .menu-item.error {
+            background-color: #ffdddd; /* Light red background */
+        }
+
         .menu-item.disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -618,8 +623,8 @@
             <h2 class="course-title">Starters</h2>
             <p class="course-description">Our starters are mainly designed to be shared and everyone will be served the same. We have quite a large variety of starters... you can savor more of them by choosing menu with more courses. :-)</p>
             <div class="selection-count" id="starters-count"></div>
-            <div class="menu-items" id="starters"></div>
             <span class="error-message" id="starters-quantity-error"></span>
+            <div class="menu-items" id="starters"></div>
         </div>
 
         <div class="course-section">
@@ -639,16 +644,16 @@
                 (With more than 8 adult guests, 2 dishes can be selected for sharing.)
             </div>
             <div class="selection-count" id="mains-count"></div>
-            <div class="menu-items" id="mains"></div>
             <span class="error-message" id="mains-quantity-error"></span>            
+            <div class="menu-items" id="mains"></div>
         </div>
 
         <div class="course-section">
             <h2 class="course-title">Desserts</h2>
             <p class="course-description">You can select up to 2 dessert items for your guests to choose from...</p>
             <div class="selection-count" id="desserts-count"></div>
-            <div class="menu-items" id="desserts"></div>
             <span class="error-message" id="desserts-quantity-error"></span>
+            <div class="menu-items" id="desserts"></div>
         </div>
 
         <!-- Add Specifics section -->
@@ -1204,8 +1209,16 @@
                     const errorElement = document.getElementById(`${category}-quantity-error`);
                     if (totalQuantity > adultCount) {
                         errorElement.textContent = `Total quantity exceeds the number of adults (${adultCount}).`;
+                        items.forEach(item => {
+                            const menuItemDiv = document.querySelector(`.menu-item[data-id="${item.id}"]`);
+                            if (menuItemDiv) menuItemDiv.classList.add('error');
+                        });
                         errorElement.style.display = 'block';
                     } else {
+                        items.forEach(item => {
+                            const menuItemDiv = document.querySelector(`.menu-item[data-id="${item.id}"]`);
+                            if (menuItemDiv) menuItemDiv.classList.remove('error');
+                        });
                         errorElement.textContent = '';
                         errorElement.style.display = 'none';
                     }
