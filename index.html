@@ -564,9 +564,6 @@
             <img src="images/gratinee-logo-sm.jpg" alt="Logo" style="max-width: 200px; height: auto;">
         </div>
 
-        <h1 id="menu-composer-title">Gratine Menu Composer</h1>
-        <h2 style="text-align: center; color: #666; font-size: 1.2em; margin-top: -35px; margin-bottom: 30px;">(developed by the chef 🤓)</h2>
-        
         <!-- Development Only - Start -->
         <div class="dev-tools" style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
             <button id="test-data" class="test-btn">Populate Test Data</button>
@@ -597,7 +594,10 @@
 
             <div class="form-group">
                 <label for="booking-date" class="required-field">Booking date:</label>
-                <input type="date" id="booking-date" name="booking-date" required>
+                <input type="date" id="booking-date" name="booking-date" required placeholder="Select date">
+                <!-- <label for="booking-date" class="required-field">Booking Date: (<span id="meal-type">Dinner</span>)</label>
+                <input type="hidden" id="meal" name="meal" value="dinner"> -->
+
                 <span class="error-message" id="date-error"></span>
             </div>
 
@@ -611,7 +611,7 @@
                 <span class="error-message" id="adult-count-error"></span>
 
                 <div class="form-group">
-                    <label for="kid-count">Number of Kids 🧒🏻: (age 5 to 12)</label>
+                    <label for="kid-count">Number of Children 🧒🏻: (age 5 to 12)</label>
                     <select id="kid-count" name="kid-count">
                         <option value="0" selected>0</option>
                     </select>
@@ -1434,13 +1434,10 @@
         function updateTitleBasedOnQueryParam() {
             const urlParams = new URLSearchParams(window.location.search);
             const mealType = urlParams.get('meal');
-            const titleElement = document.getElementById('menu-composer-title');
 
             if (mealType && mealType.toLowerCase() === 'lunch') {
-                titleElement.textContent = 'Gratine Lunch Menu Composer';
                 populateCourseCountDropdown('lunch');                
             } else {
-                titleElement.textContent = 'Gratine Dinner Menu Composer';
                 populateCourseCountDropdown('dinner');
             }
         }
@@ -1530,6 +1527,20 @@
             }
         }
 
+        function updateBookingDateLabel() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mealType = (urlParams.get('meal') || 'dinner').toLowerCase();
+            const mealTypeDisplay = mealType.charAt(0).toUpperCase() + mealType.slice(1); // Capitalize first letter
+            const label = document.querySelector('label[for="booking-date"].required-field');
+            const mealInput = document.getElementById('meal');
+
+            if (label) {
+                label.textContent = `Booking Date: (${mealTypeDisplay})`;
+            }
+            if (mealInput) {
+                mealInput.value = mealType;
+            }
+        }
         function setupDatePicker() {
             console.log("setupDatePicker");
             const dateInput = document.getElementById('booking-date');
@@ -1829,6 +1840,7 @@
             setupCourseCount();
             setupFormValidation();
             initializeMenu();
+            updateBookingDateLabel();
             initializeSelectionCounts();
             
             // Pre-populate form fields for testing
