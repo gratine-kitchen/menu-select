@@ -26,6 +26,12 @@ const courseConfig = {
         allowMultiple: true,
         displayName: 'Desserts',
         required: true
+    },
+    addons: {
+        maxSelections: 99, // Effectively unlimited for practical purposes
+        allowMultiple: true,
+        displayName: 'Add-ons',
+        required: false // Users can select zero add-ons
     }
 };
 
@@ -149,7 +155,8 @@ function processCSVData(csvData) {
             individual: [],
             sharing: []
         },
-        desserts: []
+        desserts: [],
+        addons: [] // Initialize addons array
     };
     const defaultImage = 'https://placehold.co/250x250/eeeeee/cccccc?text=No+Image';
 
@@ -209,7 +216,7 @@ function createMenuItem(item, category) {
     const isChecked = Array.isArray(selectedItems[category]) ? selectedItems[category].some(selItem => selItem.id === item.id) : (selectedItems[category] && selectedItems[category].id === item.id);
 
     let quantityDropdownHTML = '';
-    if (category !== 'starters' && currentServingStyle !== 'sharing') {
+    if (category !== 'starters' && category !== 'addons' && currentServingStyle !== 'sharing') {
          quantityDropdownHTML = `
             <select class="quantity-select" data-item-id="${item.id}" style="display: ${isChecked ? 'block' : 'none'}; position: absolute; bottom: 15px; left: 15px; width: calc(100% - 30px); max-width: 190px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.7em; z-index: 2;">
                 <option value="" disabled selected>[Optional] #Guests?</option>
@@ -217,13 +224,16 @@ function createMenuItem(item, category) {
         `;
     }
     
+    // Determine how to display the upgrade price based on the category
+    const upgradePriceText = item.upgradePrice > 0 
+        ? (category === 'addons' ? `(+$${item.upgradePrice.toFixed(2)})` : `(+$${item.upgradePrice.toFixed(2)} per guest)`)
+        : '';
+
     div.innerHTML = `
         <input type="checkbox" id="item-${item.id}" ${isChecked ? 'checked' : ''} style="z-index: 3;">
         <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/250x250/eeeeee/cccccc?text=No+Image'" class="menu-image">
         <h3>${item.name}${item.isSignature ? ' ⭐' : ''}</h3>
-        <p>${item.description}
-        ${item.upgradePrice > 0 ? `<br><b class="price-upgrade">(+$${item.upgradePrice.toFixed(2)} per guest)</b>` : ''}
-        </p>
+        <p>${item.description}${upgradePriceText ? `<br><b class="price-upgrade">${upgradePriceText}</b>` : ''}</p>
         ${item.additionalRemarks ? `<div class="ribbon"><span>${item.additionalRemarks}</span></div>` : ''}
         ${quantityDropdownHTML}
     `;
@@ -327,7 +337,7 @@ function updateSelectionCount(category) {
     const selectedCount = selectedItems[category].length;
     const maxCount = config.maxSelections;
     
-    countElement.textContent = `Please select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
+    countElement.textContent =  (category === 'addons' ? '' : `Please select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`);
     
     countElement.classList.remove('error', 'partial-success', 'success');
     if (selectedCount === 0 && config.required) { // Emphasize error if required and none selected
@@ -438,15 +448,15 @@ function updateSummary() {
         const categoryItemsForSummary = Array.isArray(items) ? items : [items];
 
         categoryItemsForSummary.forEach(item => {
+            const priceInfo = (category === 'addons' ? `(+$${item.upgradePrice.toFixed(2)})` : `(+$${item.upgradePrice.toFixed(2)} per guest)`);
             if (item && !item.disabled) { // Ensure item is not undefined
                 const quantity = getItemQuantity(item.id);
                 totalQuantityInCategory += quantity;
-                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${item.upgradePrice > 0 ? `(+$${item.upgradePrice.toFixed(2)} per guest)` : ''}</p>`;
+                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${item.upgradePrice > 0 ? priceInfo : ''}</p>`;
             }
         });
         
-        // Validate and display quantity errors for categories other than starters (if not sharing) or if individual mains
-        const isQuantityValidationApplicable = category !== 'starters' && (category !== 'mains' || currentServingStyle === 'individual');
+        const isQuantityValidationApplicable = category !== 'starters' && category !== 'addons' && (category !== 'mains' || currentServingStyle === 'individual');
 
         if (isQuantityValidationApplicable && totalQuantityInCategory > adultCount && adultCount > 0) {
             if (errorElement) {
@@ -510,8 +520,7 @@ function validateQuantities() { // This function checks if total quantities per 
         const config = courseConfig[category];
         const items = selectedItems[category];
         
-        // Only validate quantities for non-starters or individual mains
-        const isQuantityValidationApplicable = category !== 'starters' && (category !== 'mains' || currentServingStyle === 'individual');
+        const isQuantityValidationApplicable = category !== 'starters' && category !== 'addons' && (category !== 'mains' || currentServingStyle === 'individual');
 
         if (isQuantityValidationApplicable && items && Array.isArray(items) && items.length > 0) {
             let totalQuantity = 0;
