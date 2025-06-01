@@ -1,0 +1,550 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    padding: 20px;
+    background-color: #dcd3df;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.course-section {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.course-title {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+.course-description {
+    font-family: 'Georgia', serif;
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 20px;
+    padding: 0 10px;
+    font-style: italic;
+    letter-spacing: 0.3px;
+}
+
+.menu-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.menu-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    transition: transform 0.2s;
+    position: relative;
+}
+
+.menu-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.menu-item.selected {
+    border: 2px solid #27ae60;
+    background-color: #f1f8e9;
+}
+
+/* Add error state for menu item */
+.menu-item.error {
+    background-color: #ffdddd; /* Light red background */
+}
+
+.menu-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Ribbon styles */
+.ribbon {
+    position: absolute;
+    top: 10px;
+    left: -10px;
+    background-color: #67635f; /* Example color */
+    color: white;
+    padding: 3px 15px;
+    font-size: 0.8em;
+    border-radius: 0 5px 5px 0;
+    z-index: 1;
+}
+
+.menu-item img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.menu-item input[type="checkbox"] {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 3px;
+}
+
+.menu-item.disabled input[type="checkbox"] {
+    cursor: not-allowed;
+}
+
+.menu-item h3 {
+    margin-bottom: 3px;
+    color: #2c3e50;
+    font-size: 1em;
+}
+
+.menu-item p {
+    font-size: 0.85em;
+    color: #666;
+    margin-bottom: 45px;
+    line-height: 1.3;
+    max-height: 3.9em; /* (0.85em * 1.3 * 3 lines) approx */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.price-upgrade {
+    color: #e74c3c;
+    font-weight: bold;
+    margin-top: 0px;
+    font-size: 0.85em;
+}
+
+.summary {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#selected-items {
+    margin-top: 15px;
+}
+
+#selected-items p {
+    margin: 5px 0;
+}
+
+#selected-items strong {
+    color: #2c3e50;
+}
+
+.total-price {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #27ae60;
+    text-align: right; /* Applied to general .total-price, specific overrides may exist */
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+    color: #666;
+}
+
+.error { /* General error text style */
+    color: #e74c3c;
+}
+
+.booking-form {
+    background-color: #f4eff6;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+/* Add styles for required field asterisk */
+.required-field::after {
+    content: " *";
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Specific width for certain inputs, general styling for others */
+.form-group:nth-child(1) input, /* Your name */
+.form-group:nth-child(2) input, /* Contact number */
+#booking-date, /* Booking date input by ID for specificity */
+.form-group select { /* All selects in form-group */
+    width: 300px; 
+    max-width: 100%; /* Ensures mobile responsiveness */
+}
+
+.form-group input,
+.form-group select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.form-group select:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.form-row { /* Kept as block, as per original effective style */
+    display: block;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 0.9em;
+    margin-top: 5px;
+    display: block; /* Ensures it takes its own line */
+}
+
+input:invalid { /* General invalid style */
+    border-color: #e74c3c;
+}
+
+input:required:invalid,
+select:required:invalid { /* Style for required fields when blank */
+    background-color: #ffffcc; /* Light yellow */
+}
+
+input[type="date"] {
+    font-family: inherit; /* Ensures date input uses body font */
+}
+
+/* Media query for mobile responsiveness */
+@media (max-width: 600px) {
+    .form-group:nth-child(1) input,
+    .form-group:nth-child(2) input,
+    #booking-date,
+    .form-group select {
+        width: 100%; /* Full width on mobile */
+    }
+}
+
+.course-count-group {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.course-count-group select {
+    width: 330px; /* Specific width for course count select */
+    max-width: 100%;
+}
+
+.helper-text {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.price-summary {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.base-price, .upgrade-price {
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.summary .total-price { /* More specific selector for total price in summary */
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #27ae60;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #ddd;
+    text-align: right; /* Ensures it's right-aligned within summary */
+}
+
+.selection-count.partial-success {
+    color: #27ae60;
+}
+
+.selection-count.error {
+    color: #e74c3c;
+}
+
+.selection-count.success {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.selection-count::after { /* Removed "(Required)" text */
+    content: '';
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    overflow: auto;
+}
+
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 90vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #bbb;
+}
+
+/* Serving style selection */
+.serving-style-selection {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: flex;
+    gap: 10px;
+}
+
+.radio-label {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+    padding: 10px 15px;
+    background-color: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.radio-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-label:hover {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.radio-label input[type="radio"]:checked + span {
+    color: #2c3e50;
+}
+
+.radio-label input[type="radio"]:checked + span::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -15px;
+    right: -15px;
+    bottom: -10px;
+    background-color: #e3f2fd;
+    border-radius: 6px;
+    z-index: -1;
+}
+
+.radio-label span {
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+}
+
+.radio-label.selected {
+    background-color: #e3f2fd;
+    border-color: #3498db;
+}
+
+/* Button group and specific button styles */
+.button-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.send-email-btn, .whatsapp-btn {
+    display: inline-block; /* Changed from block for side-by-side in button-group */
+    width: auto; /* Allow content to determine width, max-width will constrain */
+    min-width: 180px; /* Ensure buttons have a decent minimum width */
+    max-width: 220px; /* Max width for individual buttons */
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+.send-email-btn {
+    background-color: #3498db;
+    color: white;
+    /* display: none; /* Controlled by JS or media queries if needed for specific instances */
+}
+
+.send-email-btn:hover {
+    background-color: #2980b9;
+}
+
+.whatsapp-btn {
+    background-color: #25D366;
+    color: white;
+}
+
+.whatsapp-btn:hover {
+    background-color: #128C7E;
+}
+
+.send-email-btn:disabled, .whatsapp-btn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+/* Specific display for send-email-btn at the top (dev tools) vs bottom */
+#send-email-top {
+    display: inline-block; /* Ensure it's visible if dev tools are shown */
+}
+.summary .send-email-btn { /* Email button in the final summary */
+     display: none; /* Hide by default, show on larger screens */
+}
+
+
+@media (min-width: 769px) {
+    .summary .send-email-btn {
+        display: inline-block; /* Show email button on desktop */
+    }
+    .summary .whatsapp-btn {
+        /* WhatsApp button in summary can be always visible or also media query controlled */
+        /* display: inline-block; */
+    }
+}
+
+
+/* Media query for button layout on mobile */
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .send-email-btn, .whatsapp-btn {
+        width: 100%; /* Full width buttons in column layout */
+        max-width: 300px; /* Max width for stacked buttons */
+    }
+    
+    .summary .send-email-btn {
+        display: none; /* Ensure email button is hidden in summary on mobile */
+    }
+    .summary .whatsapp-btn {
+        display: inline-block; /* Ensure WhatsApp button is visible in summary on mobile */
+    }
+}
+
+/* Development Only - Start */
+.dev-tools {
+    border: 1px dashed #ccc;
+    display: none; /* Hidden by default */
+    margin-bottom: 20px; 
+    padding: 10px; 
+    background-color: #f8f9fa; 
+    border-radius: 4px;
+}
+
+.test-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: inline-block; /* Ensure it's visible if dev tools are shown */
+}
+
+.test-btn:hover {
+    background-color: #5a6268;
+}
+/* Development Only - End */
+
+/* CSS for error indication on select elements */
+.error-field {
+    border-color: #e74c3c !important; /* Red border */
+}
+
+/* Ensure error messages are initially hidden if not already handled by JS */
+.error-message {
+    display: none; 
+}
+#soups-quantity-error, #starters-quantity-error, #mains-quantity-error, #desserts-quantity-error, #date-error, #adult-count-error {
+    display: none; /* Explicitly hide specific error spans */
+}
