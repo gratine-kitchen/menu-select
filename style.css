@@ -138,7 +138,7 @@ h1 {
 }
 
 .price-upgrade {
-    color: #e74c3c;
+    color: #666; /* Changed from #e74c3c to match menu item description text */
     font-weight: bold;
     margin-top: 0px;
     font-size: 0.85em;
