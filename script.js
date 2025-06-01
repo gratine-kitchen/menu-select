@@ -263,15 +263,6 @@ function createMenuItem(item, category) {
         }
     });
     
-    // Image click to enlarge
-    const imgElement = div.querySelector('.menu-image');
-    if (imgElement) {
-        imgElement.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent menu item click
-            showEnlargedImage(item.image);
-        });
-    }
-
     return div;
 }
 
@@ -859,29 +850,6 @@ function setupCourseCount() {
     }
 }
 
-
-function showEnlargedImage(imageUrl) {
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalImage');
-    const closeBtn = document.querySelector('.close-modal');
-
-    if (!modal || !modalImg || !closeBtn) return;
-
-    modal.style.display = "block";
-    modalImg.src = imageUrl;
-    modalImg.alt = "Enlarged menu item image";
-
-    const closeModalFunc = () => modal.style.display = "none";
-    
-    closeBtn.onclick = closeModalFunc;
-    modal.onclick = (event) => {
-        if (event.target === modal) closeModalFunc();
-    };
-    document.onkeydown = (event) => {
-        if (event.key === "Escape") closeModalFunc();
-    };
-}
-
 function updateButtonStates() {
     const name = document.getElementById('customer-name').value.trim();
     const contactNumber = document.getElementById('contact-number').value.trim();
@@ -1154,4 +1122,3 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.test-btn').forEach(el => el.style.display = 'inline-block');
     }
 });
-
