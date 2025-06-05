@@ -188,7 +188,8 @@ function processCSVData(csvData) {
             additionalRemarks: row.AdditionalRemarks || '',
             servingStyle: (row['ServingStyle'] || 'individual').toLowerCase().trim(),
             isSignature: ['TRUE', 'YES', '1'].includes(String(row.IsSignature).toUpperCase()),
-            mealAvailability: (row['MealAvailability'] || 'Both').toLowerCase().trim()
+            mealAvailability: (row['MealAvailability'] || 'Both').toLowerCase().trim(),
+            remarksColor: row.RemarksColor || null // Add this line
         };
 
         const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
@@ -229,12 +230,15 @@ function createMenuItem(item, category) {
         ? (category === 'addons' ? `(+$${item.upgradePrice.toFixed(2)})` : `(+$${item.upgradePrice.toFixed(2)} per guest)`)
         : '';
 
+    // Determine ribbon style
+    const ribbonStyle = item.remarksColor ? `style="background-color: ${item.remarksColor};"` : '';
+
     div.innerHTML = `
         <input type="checkbox" id="item-${item.id}" ${isChecked ? 'checked' : ''} style="z-index: 3;">
         <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/250x250/eeeeee/cccccc?text=No+Image'" class="menu-image">
         <h3>${item.name}${item.isSignature ? ' ⭐' : ''}</h3>
         <p>${item.description}${upgradePriceText ? `<br><b class="price-upgrade">${upgradePriceText}</b>` : ''}</p>
-        ${item.additionalRemarks ? `<div class="ribbon"><span>${item.additionalRemarks}</span></div>` : ''}
+        ${item.additionalRemarks ? `<div class="ribbon" ${ribbonStyle}><span>${item.additionalRemarks}</span></div>` : ''}
         ${quantityDropdownHTML}
     `;
 
