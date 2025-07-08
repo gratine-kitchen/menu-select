@@ -964,6 +964,9 @@ function applyReadonlyMode() {
     // Hide development tools
     document.querySelectorAll('.dev-tools').forEach(el => el.style.display = 'none');
 
+    // Display Menu Options
+    document.getElementById('menu-options-image').style.display = 'inline';
+
     // For each course section, hide all descriptive elements, leaving only the menu items
     const courseSections = document.querySelectorAll('.course-section');
     courseSections.forEach(section => {
