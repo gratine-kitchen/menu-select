@@ -1,5 +1,6 @@
 const MAX_CAPACITY = 18;
 const MAX_CHILDREN = 9; // Max children, not total with adults
+let isReadonly = false;
 
 // Configuration object for course selections
 const courseConfig = {
@@ -217,7 +218,7 @@ function createMenuItem(item, category) {
     const isChecked = Array.isArray(selectedItems[category]) ? selectedItems[category].some(selItem => selItem.id === item.id) : (selectedItems[category] && selectedItems[category].id === item.id);
 
     let quantityDropdownHTML = '';
-    if (category !== 'starters' && category !== 'addons' && currentServingStyle !== 'sharing') {
+    if (!isReadonly && category !== 'starters' && category !== 'addons' && currentServingStyle !== 'sharing') {
          quantityDropdownHTML = `
             <select class="quantity-select" data-item-id="${item.id}" style="display: ${isChecked ? 'block' : 'none'}; position: absolute; bottom: 15px; left: 15px; width: calc(100% - 30px); max-width: 190px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.7em; z-index: 2;">
                 <option value="" disabled selected>[Optional] #Guests?</option>
@@ -234,7 +235,7 @@ function createMenuItem(item, category) {
     const ribbonStyle = item.remarksColor ? `style="background-color: ${item.remarksColor};"` : '';
 
     div.innerHTML = `
-        <input type="checkbox" id="item-${item.id}" ${isChecked ? 'checked' : ''} style="z-index: 3;">
+        <input type="checkbox" id="item-${item.id}" ${isChecked ? 'checked' : ''} style="z-index: 3;" ${isReadonly ? 'disabled' : ''}>
         <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/250x250/eeeeee/cccccc?text=No+Image'" class="menu-image">
         <h3>${item.name}${item.isSignature ? ' ⭐' : ''}</h3>
         <p>${item.description}${upgradePriceText ? `<br><b class="price-upgrade">${upgradePriceText}</b>` : ''}</p>
@@ -253,11 +254,16 @@ function createMenuItem(item, category) {
     }
 
     const checkbox = div.querySelector('input[type="checkbox"]');
+    if (isReadonly) {
+        checkbox.style.display = 'none';
+    } else {
     checkbox.addEventListener('change', () => {
-        if (!div.classList.contains('disabled')) {
-            selectItem(item, category, div);
-        }
-    });
+            if (isReadonly) return;
+            if (!div.classList.contains('disabled')) {
+                selectItem(item, category, div);
+            }
+        });
+    }
 
     const selectElement = div.querySelector('.quantity-select');
     if (selectElement) {
@@ -268,6 +274,7 @@ function createMenuItem(item, category) {
     }
 
     div.addEventListener('click', (event) => {
+        if (isReadonly) return;
         if (event.target.matches('input[type="checkbox"]') || event.target.matches('select.quantity-select') || event.target.matches('select.quantity-select option')) {
             return; // Let the specific handlers work
         }
@@ -943,6 +950,37 @@ function setupFormValidationAndInteractions() {
     updateButtonStates();
 }
 
+function applyReadonlyMode() {
+    document.body.classList.add('readonly-mode');
+
+    // Hide the main booking form
+    const bookingForm = document.querySelector('.booking-form');
+    if (bookingForm) bookingForm.style.display = 'none';
+
+    // Hide the final summary and submission buttons
+    const summary = document.querySelector('.summary');
+    if (summary) summary.style.display = 'none';
+
+    // Hide development tools
+    document.querySelectorAll('.dev-tools').forEach(el => el.style.display = 'none');
+
+    // For each course section, hide all descriptive elements, leaving only the menu items
+    const courseSections = document.querySelectorAll('.course-section');
+    courseSections.forEach(section => {
+        // The "Additional Information" section has no menu items, so hide it completely
+        if (!section.querySelector('.menu-items')) {
+            section.style.display = 'none';
+            return;
+        }
+
+        // Hide all direct children of the section except for the .menu-items container
+        Array.from(section.children).forEach(child => {
+            if (!child.classList.contains('menu-items') && !child.classList.contains('course-title')) {
+                child.style.display = 'none';
+            }
+        });
+    });
+}
 
 // --- Email and WhatsApp Logic ---
 (function() {
@@ -1067,7 +1105,14 @@ function sendWhatsApp() {
 // --- DOMContentLoaded ---
 window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded, initializing menu builder...');
-    
+
+    const urlParams = new URLSearchParams(window.location.search);
+    isReadonly = urlParams.has('readonly');
+
+    if (isReadonly) {
+        applyReadonlyMode();
+    }
+
     updateTitleBasedOnQueryParam(); // Populates course count based on meal type (lunch/dinner)
     setupDatePicker();
     setupNumberSelects();
