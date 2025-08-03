@@ -186,6 +186,7 @@ function processCSVData(csvData) {
             description: row.Description || '',
             image: getDirectImageUrl(row['Image URL']),
             upgradePrice: parseFloat(row['Upgrade Price']) || 0,
+            upgradeCaption: row['Upgrade Caption'] || '',
             additionalRemarks: row.AdditionalRemarks || '',
             servingStyle: (row['ServingStyle'] || 'individual').toLowerCase().trim(),
             isSignature: ['TRUE', 'YES', '1'].includes(String(row.IsSignature).toUpperCase()),
@@ -227,9 +228,12 @@ function createMenuItem(item, category) {
     }
     
     // Determine how to display the upgrade price based on the category
-    const upgradePriceText = item.upgradePrice > 0 
-        ? (category === 'addons' ? `(+$${item.upgradePrice.toFixed(2)})` : `(+$${item.upgradePrice.toFixed(2)} per guest)`)
-        : '';
+    let upgradePriceText = '';
+    if (item.upgradePrice > 0) {
+        const priceString = `+$${item.upgradePrice.toFixed(0)}`;
+        const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
+        upgradePriceText = `(${priceString}${caption})`;
+    }
 
     // Determine ribbon style
     const ribbonStyle = item.remarksColor ? `style="background-color: ${item.remarksColor};"` : '';
@@ -459,11 +463,16 @@ function updateSummary() {
         const categoryItemsForSummary = Array.isArray(items) ? items : [items];
 
         categoryItemsForSummary.forEach(item => {
-            const priceInfo = (category === 'addons' ? `(+$${item.upgradePrice.toFixed(2)})` : `(+$${item.upgradePrice.toFixed(2)} per guest)`);
             if (item && !item.disabled) { // Ensure item is not undefined
+                let priceInfo = '';
+                if (item.upgradePrice > 0) {
+                    const priceString = `+$${item.upgradePrice.toFixed(2)}`;
+                    const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
+                    priceInfo = `(${priceString}${caption})`;
+                }
                 const quantity = getItemQuantity(item.id);
                 totalQuantityInCategory += quantity;
-                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${item.upgradePrice > 0 ? priceInfo : ''}</p>`;
+                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${priceInfo}</p>`;
             }
         });
         
