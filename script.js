@@ -219,7 +219,17 @@ function createMenuItem(item, category) {
     const isChecked = Array.isArray(selectedItems[category]) ? selectedItems[category].some(selItem => selItem.id === item.id) : (selectedItems[category] && selectedItems[category].id === item.id);
 
     let quantityDropdownHTML = '';
-    if (!isReadonly && category !== 'starters' && category !== 'addons' && currentServingStyle !== 'sharing') {
+    if (!isReadonly && category === 'addons') {
+        let optionsHTML = '<option value="" disabled selected>#Portions:</option>';
+        for (let i = 1; i <= 5; i++) {
+            optionsHTML += `<option value="${i}">${i}</option>`;
+        }
+        quantityDropdownHTML = `
+            <select class="quantity-select" data-item-id="${item.id}" style="display: ${isChecked ? 'block' : 'none'}; position: absolute; bottom: 15px; left: 15px; width: calc(100% - 30px); max-width: 190px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.7em; z-index: 2;">
+                ${optionsHTML}
+            </select>
+        `;
+    } else if (!isReadonly && category !== 'starters' && category !== 'addons' && currentServingStyle !== 'sharing') {
          quantityDropdownHTML = `
             <select class="quantity-select" data-item-id="${item.id}" style="display: ${isChecked ? 'block' : 'none'}; position: absolute; bottom: 15px; left: 15px; width: calc(100% - 30px); max-width: 190px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.7em; z-index: 2;">
                 <option value="" disabled selected>[Optional] #Guests?</option>
@@ -230,7 +240,7 @@ function createMenuItem(item, category) {
     // Determine how to display the upgrade price based on the category
     let upgradePriceText = '';
     if (item.upgradePrice > 0) {
-        const priceString = `+$${item.upgradePrice.toFixed(0)}`;
+        const priceString = `+$${item.upgradePrice.toFixed(2)}`;
         const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
         upgradePriceText = `(${priceString}${caption})`;
     }
@@ -247,8 +257,17 @@ function createMenuItem(item, category) {
         ${quantityDropdownHTML}
     `;
 
-    if (quantityDropdownHTML) {
-        updateQuantityDropdown(div.querySelector('.quantity-select'));
+    if (quantityDropdownHTML) { 
+        const selectElement = div.querySelector('.quantity-select');
+        if (category === 'addons') {
+            // For addons, options are pre-built. Just restore value if it exists.
+            const quantity = getItemQuantity(item.id);
+            if (quantity > 0) {
+                selectElement.value = quantity;
+            }
+        } else {
+            updateQuantityDropdown(selectElement);
+        }
     }
     
     const urlParams = new URLSearchParams(window.location.search);
@@ -399,7 +418,16 @@ function selectItem(item, category, element) {
                 selectedItems[category].push(item);
                 element.classList.add('selected');
                 if(checkbox) checkbox.checked = true;
-                if (quantitySelect) quantitySelect.style.display = 'block';
+                if (quantitySelect) {
+                    quantitySelect.style.display = 'block';
+                    if (category === 'addons') {
+                        // Default to 1 portion if none is selected yet
+                        if (!quantitySelect.value) {
+                            quantitySelect.value = '1';
+                            handleQuantityChange({ target: quantitySelect }, item.id);
+                        }
+                    }
+                }
             } else {
                 // Max reached, prevent selection
                 if(checkbox) checkbox.checked = false;
@@ -800,7 +828,7 @@ function setupNumberSelects() {
         validateAdultKidCount();
         // If adult count changes, quantity dropdowns for menu items need update
         if (sel === adultSelect) {
-            document.querySelectorAll('.menu-item .quantity-select').forEach(qs => updateQuantityDropdown(qs));
+                document.querySelectorAll('.menu-item:not([data-category="addons"]) .quantity-select').forEach(qs => updateQuantityDropdown(qs));
             updateSummary(); // Re-validate quantities in summary
         }
          // If adult count changes and main course is sharing, update its display rules
