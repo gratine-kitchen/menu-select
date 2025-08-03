@@ -240,7 +240,7 @@ function createMenuItem(item, category) {
     // Determine how to display the upgrade price based on the category
     let upgradePriceText = '';
     if (item.upgradePrice > 0) {
-        const priceString = `+$${item.upgradePrice.toFixed(2)}`;
+        const priceString = `+$${item.upgradePrice.toFixed(0)}`;
         const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
         upgradePriceText = `(${priceString}${caption})`;
     }
@@ -494,7 +494,7 @@ function updateSummary() {
             if (item && !item.disabled) { // Ensure item is not undefined
                 let priceInfo = '';
                 if (item.upgradePrice > 0) {
-                    const priceString = `+$${item.upgradePrice.toFixed(2)}`;
+                    const priceString = `+$${item.upgradePrice.toFixed(0)}`;
                     const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
                     priceInfo = `(${priceString}${caption})`;
                 }
