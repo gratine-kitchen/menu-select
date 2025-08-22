@@ -371,20 +371,31 @@ function updateSelectionCount(category) {
     const selectedCount = selectedItems[category].length;
     const maxCount = config.maxSelections;
     
-    countElement.textContent =  (category === 'addons' ? '' : `Please select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`);
+    if (category === 'starters') {
+        countElement.textContent = `Please select ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
+    } else {
+        countElement.textContent =  (category === 'addons' ? '' : `Please select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`);
+    }
     
     countElement.classList.remove('error', 'partial-success', 'success');
-    if (selectedCount === 0 && config.required) { // Emphasize error if required and none selected
-        countElement.classList.add('error');
-    } else if (selectedCount > maxCount) {
-        countElement.classList.add('error');
-    } else if (selectedCount > 0 && selectedCount < maxCount) {
-        countElement.classList.add('partial-success');
-    } else if (selectedCount === maxCount) {
-        countElement.classList.add('success');
+
+    if (category === 'starters') {
+        if (selectedCount === maxCount) {
+            countElement.classList.add('success');
+        } else if (config.required) { // Any other count is an error for required starters
+            countElement.classList.add('error');
+        }
+    } else {
+        if (selectedCount === 0 && config.required) {
+            countElement.classList.add('error');
+        } else if (selectedCount > maxCount) {
+            countElement.classList.add('error');
+        } else if (selectedCount > 0 && selectedCount < maxCount) {
+            countElement.classList.add('partial-success');
+        } else if (selectedCount === maxCount) {
+            countElement.classList.add('success');
+        }
     }
-
-
     const menuItemsInCategory = document.querySelectorAll(`#${category} .menu-item`);
     menuItemsInCategory.forEach(itemDiv => {
         const checkbox = itemDiv.querySelector('input[type="checkbox"]');
@@ -966,8 +977,14 @@ function updateButtonStates() {
             // 1. Check selection count
             let isSelectionCountValid = false;
             if (courseConfig[category].allowMultiple) {
-                if (selected && selected.length >= minSelections && selected.length <= maxSelections) {
-                    isSelectionCountValid = true;
+                if (category === 'starters') {
+                    if (selected && selected.length === maxSelections) {
+                        isSelectionCountValid = true;
+                    }
+                } else {
+                    if (selected && selected.length >= minSelections && selected.length <= maxSelections) {
+                        isSelectionCountValid = true;
+                    }
                 }
             } else {
                 if (selected) {
