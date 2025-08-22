@@ -1157,27 +1157,33 @@ window.addEventListener('DOMContentLoaded', () => {
     setupDatePicker();
     setupNumberSelects();
     setupCourseCount(); // Sets up listener for course count changes and initializes price/starter limits
-    
+
+    // Pre-populate form fields for testing/linking (before menu loads)
+    const fieldsToPrepopulate = {
+        'customer-name': urlParams.get('CustomerName'),
+        'contact-number': urlParams.get('ContactNumber'),
+        'booking-date': urlParams.get('BookingDate'),
+        'adult-count': urlParams.get('NumAdults')
+    };
+    let adultCountWasPrepopulated = false;
+    for (const id in fieldsToPrepopulate) {
+        if (fieldsToPrepopulate[id]) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.value = fieldsToPrepopulate[id];
+                if (id === 'adult-count') {
+                    adultCountWasPrepopulated = true;
+                }
+            }
+        }
+    }
+
     initializeMenu().then(() => {
         // Setup interactions that might depend on menu items being present
         setupServingStyleControls(); // This also calls updateMainCourseDisplay
         
-        // Pre-populate form fields for testing/linking
-        const urlParams = new URLSearchParams(window.location.search);
-        const fieldsToPrepopulate = {
-            'customer-name': urlParams.get('CustomerName'),
-            'contact-number': urlParams.get('ContactNumber'),
-            'booking-date': urlParams.get('BookingDate'),
-            'adult-count': urlParams.get('NumAdults')
-        };
-        for (const id in fieldsToPrepopulate) {
-            if (fieldsToPrepopulate[id]) {
-                const element = document.getElementById(id);
-                if (element) element.value = fieldsToPrepopulate[id];
-            }
-        }
-        // If adult count was prepopulated, trigger its change event for downstream effects
-        if (fieldsToPrepopulate['adult-count']) {
+        // If adult count was prepopulated, trigger its change event now that menu is loaded
+        if (adultCountWasPrepopulated) {
             document.getElementById('adult-count').dispatchEvent(new Event('change'));
         }
         
