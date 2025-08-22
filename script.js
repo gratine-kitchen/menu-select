@@ -792,9 +792,8 @@ function updateBookingDateLabel() { // This function seems to be for a hidden me
 function setupDatePicker() {
     const dateInput = document.getElementById('booking-date');
     const dateError = document.getElementById('date-error');
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1); // Booking must be at least for tomorrow
-    tomorrow.setHours(0, 0, 0, 0); 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to the beginning of the day for comparison
 
     const maxDate = new Date();
     maxDate.setMonth(maxDate.getMonth() + 3); // Max 3 months in advance
@@ -802,7 +801,7 @@ function setupDatePicker() {
 
     const formatDateForInput = (date) => date.toISOString().split('T')[0];
 
-    dateInput.min = formatDateForInput(tomorrow);
+    dateInput.min = formatDateForInput(new Date()); // min attribute should be today's actual date
     dateInput.max = formatDateForInput(maxDate);
 
     dateInput.addEventListener('change', (e) => {
@@ -811,9 +810,10 @@ function setupDatePicker() {
         dateError.style.display = 'none';
 
         if (selectedDate < today || selectedDate > maxDate) {
-            dateError.textContent = 'Please select a date up to 3 months in advance.';
+
+            dateError.textContent = (selectedDate < today) ? 'This date is already in the past' : 'Please select a date up to 3 months in advance.';
             dateError.style.display = 'block';
-            e.target.value = ''; // Clear invalid date
+            // e.target.value = ''; // Clear invalid date
         }
         updateButtonStates();
     });
@@ -1224,8 +1224,8 @@ window.addEventListener('DOMContentLoaded', () => {
         applyReadonlyMode();
     }
 
-    updateTitleBasedOnQueryParam(); // Populates course count based on meal type (lunch/dinner)
     setupDatePicker();
+    updateTitleBasedOnQueryParam(); // Populates course count based on meal type (lunch/dinner)
     setupNumberSelects();
     setupCourseCount(); // Sets up listener for course count changes and initializes price/starter limits
 
@@ -1244,6 +1244,10 @@ window.addEventListener('DOMContentLoaded', () => {
                 element.value = fieldsToPrepopulate[id];
                 if (id === 'adult-count') {
                     adultCountWasPrepopulated = true;
+                }
+                // Trigger change for booking date immediately to run validation
+                if (id === 'booking-date') {
+                    element.dispatchEvent(new Event('change'));
                 }
             }
         }
