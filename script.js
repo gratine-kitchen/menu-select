@@ -937,6 +937,7 @@ function setupCourseCount() {
 }
 
 function updateButtonStates() {
+    // --- Basic Info Check ---
     const name = document.getElementById('customer-name').value.trim();
     const contactNumber = document.getElementById('contact-number').value.trim();
     const bookingDate = document.getElementById('booking-date').value;
@@ -944,41 +945,59 @@ function updateButtonStates() {
     const arrivalTime = arrivalTimeEl ? arrivalTimeEl.value.trim() : '';
     const adultCountVal = document.getElementById('adult-count').value;
     const courseCountVal = document.getElementById('course-count').value;
-
-    let isFormValid = name && contactNumber && bookingDate && arrivalTime && adultCountVal && courseCountVal;
-    
-    // Check adult/kid count validity
     const adultKidError = document.getElementById('adult-count-error').textContent;
-    if (adultKidError) isFormValid = false;
-
-    // Check date validity
     const dateError = document.getElementById('date-error').textContent;
-    if (dateError) isFormValid = false;
+    const isFormValid = name && contactNumber && bookingDate && arrivalTime && adultCountVal && courseCountVal && !adultKidError && !dateError;
+    document.querySelector('#status-basic-info .status-dot')?.classList.toggle('completed', isFormValid);
 
-    let areSelectionsValid = true;
+    // --- Selections & Quantities Check ---
+    let areAllSelectionsValid = true;
+    const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+
     for (const category in courseConfig) {
         if (courseConfig[category].required) {
+            const statusElement = document.querySelector(`#status-${category} .status-dot`);
+            if (!statusElement) continue;
+
             const selected = selectedItems[category];
-            const minSelections = 1; // Required implies at least 1
+            const minSelections = 1;
             const maxSelections = courseConfig[category].maxSelections;
             
+            // 1. Check selection count
+            let isSelectionCountValid = false;
             if (courseConfig[category].allowMultiple) {
-                if (!selected || selected.length < minSelections || selected.length > maxSelections) {
-                    areSelectionsValid = false;
-                    break;
+                if (selected && selected.length >= minSelections && selected.length <= maxSelections) {
+                    isSelectionCountValid = true;
                 }
-            } else { // Single select (not default, but for completeness)
-                if (!selected) {
-                    areSelectionsValid = false;
-                    break;
+            } else {
+                if (selected) {
+                    isSelectionCountValid = true;
                 }
+            }
+
+            // 2. Check quantity for this category
+            let isQuantityValid = true;
+            const isQuantityValidationApplicable = category !== 'starters' && category !== 'addons' && (category !== 'mains' || currentServingStyle === 'individual');
+            if (isSelectionCountValid && isQuantityValidationApplicable && adultCount > 0) {
+                let totalQuantity = 0;
+                (Array.isArray(selected) ? selected : [selected]).forEach(item => {
+                    totalQuantity += getItemQuantity(item.id);
+                });
+                if (totalQuantity > adultCount) {
+                    isQuantityValid = false;
+                }
+            }
+            
+            const isCategoryOverallValid = isSelectionCountValid && isQuantityValid;
+            statusElement.classList.toggle('completed', isCategoryOverallValid);
+
+            if (!isCategoryOverallValid) {
+                areAllSelectionsValid = false;
             }
         }
     }
     
-    const quantitiesOk = validateQuantities(); // Checks if sum of quantities per category <= adults
-
-    const overallValid = isFormValid && areSelectionsValid && quantitiesOk;
+    const overallValid = isFormValid && areAllSelectionsValid;
 
     document.querySelectorAll('.send-email-btn, .whatsapp-btn').forEach(button => {
         button.disabled = !overallValid;

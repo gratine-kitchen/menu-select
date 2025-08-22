@@ -30,6 +30,7 @@
         </div>
         <!-- Development Only - End -->
         <div class="booking-form">
+            <h2 class="course-title">Reservation Details</h2>
             <div class="form-group">
                 <label for="customer-name" class="required-field">Your name:</label>
                 <input type="text" id="customer-name" name="customer-name" required>
@@ -90,7 +91,7 @@
         <!-- Course sections follow -->
         <div class="course-section">
             <h2 class="course-title">Soups</h2>
-            <p class="course-description">You can select up to 2 soup items for your guests to choose from...</p>
+            <p class="course-description">Please select up to 2 soup items for your guests to choose from...</p>
             <div class="selection-count" id="soups-count"></div>
             <span class="error-message" id="soups-quantity-error"></span>
             <div class="menu-items" id="soups"></div>
@@ -190,6 +191,13 @@
         <div class="summary">
             <h2 id="summary-heading">You have selected the <span id="course-count-display">0</span> course menu (<span id="menu-price-display">$0</span>) with the following dishes:</h2>
             <div id="selected-items"></div>
+            <div id="completion-status" class="completion-status-container">
+                <span class="status-item" id="status-basic-info"><span class="status-dot"></span>Reservation Details</span>
+                <span class="status-item" id="status-soups"><span class="status-dot"></span>Soups</span>
+                <span class="status-item" id="status-starters"><span class="status-dot"></span>Starters</span>
+                <span class="status-item" id="status-mains"><span class="status-dot"></span>Main Courses</span>
+                <span class="status-item" id="status-desserts"><span class="status-dot"></span>Desserts</span>
+            </div>
             <div class="button-group">
                 <button id="send-email" class="send-email-btn">Send Menu Selection</button>
                 <button id="send-whatsapp" class="whatsapp-btn">Submit (via WhatsApp)</button>
