@@ -212,6 +212,7 @@ h1 {
 .form-group:nth-child(1) input, /* Your name */
 .form-group:nth-child(2) input, /* Contact number */
 #booking-date, /* Booking date input by ID for specificity */
+#arrival-time, /* Arrival time input */
 .form-group select { /* All selects in form-group */
     width: 300px; 
     max-width: 100%; /* Ensures mobile responsiveness */

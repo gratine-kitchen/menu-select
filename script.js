@@ -533,6 +533,8 @@ function updateSummary() {
     });
 
     // Add specifics to the summary
+    const arrivalTimeEl = document.getElementById('arrival-time');
+    const arrivalTime = arrivalTimeEl ? arrivalTimeEl.value.trim() : '';
     const allergies = document.getElementById('allergies').value;
     const occasion = document.getElementById('occasion').value;
     const specialRequestsChecked = Array.from(document.querySelectorAll('input[name="special-requests"]:checked'))
@@ -911,10 +913,12 @@ function updateButtonStates() {
     const name = document.getElementById('customer-name').value.trim();
     const contactNumber = document.getElementById('contact-number').value.trim();
     const bookingDate = document.getElementById('booking-date').value;
+    const arrivalTimeEl = document.getElementById('arrival-time');
+    const arrivalTime = arrivalTimeEl ? arrivalTimeEl.value.trim() : '';
     const adultCountVal = document.getElementById('adult-count').value;
     const courseCountVal = document.getElementById('course-count').value;
 
-    let isFormValid = name && contactNumber && bookingDate && adultCountVal && courseCountVal;
+    let isFormValid = name && contactNumber && bookingDate && arrivalTime && adultCountVal && courseCountVal;
     
     // Check adult/kid count validity
     const adultKidError = document.getElementById('adult-count-error').textContent;
@@ -956,7 +960,7 @@ function updateButtonStates() {
 
 function setupFormValidationAndInteractions() {
     const formFieldsToWatch = [
-        'customer-name', 'contact-number', 'booking-date', 
+        'customer-name', 'contact-number', 'booking-date', 'arrival-time',
         'adult-count', 'kid-count', 'course-count',
         'allergies', 'occasion'
     ];
@@ -971,13 +975,13 @@ function setupFormValidationAndInteractions() {
     document.querySelectorAll('input[name="special-requests"]').forEach(input => {
         input.addEventListener('change', updateSummary);
     });
-    document.querySelector('input[name="special-requests-others"]').addEventListener('input', updateSummary);
-
 
     // Enable/disable "Others" text input based on checkbox
     const othersCheckbox = document.querySelector('input[name="special-requests"][value="others"]');
     const othersTextInput = document.querySelector('input[name="special-requests-others"]');
     if (othersCheckbox && othersTextInput) {
+        // Add the listener here inside the safe block
+        othersTextInput.addEventListener('input', updateSummary);
         const toggleOthersText = () => othersTextInput.disabled = !othersCheckbox.checked;
         othersCheckbox.addEventListener('change', toggleOthersText);
         toggleOthersText(); // Initial state
@@ -1037,6 +1041,8 @@ function getSharedMessageData() {
     const name = document.getElementById('customer-name').value.trim();
     const contactNumber = document.getElementById('contact-number').value.trim();
     const bookingDate = document.getElementById('booking-date').value;
+    const arrivalTimeEl = document.getElementById('arrival-time');
+    const arrivalTime = arrivalTimeEl ? arrivalTimeEl.value.trim() : '';
     const adultCount = document.getElementById('adult-count').value;
     const kidCount = document.getElementById('kid-count').value || '0';
     const toddlerCount = document.getElementById('toddler-count').value || '0';
@@ -1049,7 +1055,7 @@ function getSharedMessageData() {
 
     const menuPriceDisplay = document.getElementById('menu-price-display').textContent;
 
-    if (!name || !contactNumber || !bookingDate || !adultCount || !courseCountSelectedValue) {
+    if (!name || !contactNumber || !bookingDate || !arrivalTime || !adultCount || !courseCountSelectedValue) {
         throw new Error('Please fill in all required fields in the booking form.');
     }
 
@@ -1061,7 +1067,7 @@ function getSharedMessageData() {
     formattedItems = formattedItems.replace(/^\s*[\r\n]/gm, ''); // Remove empty lines
 
     return {
-        name, contactNumber, bookingDate, adultCount, kidCount, toddlerCount,
+        name, contactNumber, bookingDate, arrivalTime, adultCount, kidCount, toddlerCount,
         courseCountLabel, // Use the descriptive label
         menuPriceDisplay, formattedItems
     };
@@ -1081,6 +1087,7 @@ async function sendEmail() {
             from_name: data.name,
             contact_number: data.contactNumber,
             booking_date: data.bookingDate,
+            arrival_time: data.arrivalTime,
             adult_count: data.adultCount,
             kid_count: data.kidCount,
             toddler_count: data.toddlerCount,
@@ -1120,6 +1127,7 @@ function sendWhatsApp() {
     try {
         const data = getSharedMessageData();
         const message = `Hi, this is *${data.name}* regarding my menu selection for *${data.bookingDate}*.\n\n` +
+            `*Arrival Time:* ${data.arrivalTime}\n` +
             `*#Adults:* ${data.adultCount}\n` +
             `*#Kids:* ${data.kidCount}\n` +
             `*#Toddlers:* ${data.toddlerCount}\n` +
@@ -1211,6 +1219,8 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('contact-number').value = '12345678';
         const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 2);
         document.getElementById('booking-date').value = tomorrow.toISOString().split('T')[0];
+        const arrivalTimeEl = document.getElementById('arrival-time');
+        if (arrivalTimeEl) arrivalTimeEl.value = '7:30 PM';
         document.getElementById('adult-count').value = '4';
         document.getElementById('adult-count').dispatchEvent(new Event('change')); // Trigger updates
         document.getElementById('course-count').selectedIndex = 1; // Select 2nd option
