@@ -504,6 +504,14 @@ input[type="date"] {
     background-color: #27ae60; /* Green for completed */
 }
 
+.submission-note {
+    font-size: 0.85em;
+    font-style: italic;
+    color: #666;
+    text-align: center;
+    margin-top: 15px;
+}
+
 /* Development Only - Start */
 .dev-tools {
     border: 1px dashed #ccc;
