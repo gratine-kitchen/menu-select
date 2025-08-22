@@ -726,7 +726,7 @@ async function initializeMenu() {
     try {
         console.log('Starting menu initialization...');
         document.querySelectorAll('.menu-items').forEach(el => {
-            el.innerHTML = '<div class="loading">Loading menu items...</div>';
+            el.innerHTML = '<div class="loading">Photos being loaded...</div>';
         });
 
         const menuData = await fetchMenuData();
