@@ -799,8 +799,8 @@ function setupDatePicker() {
         dateError.textContent = '';
         dateError.style.display = 'none';
 
-        if (selectedDate < tomorrow || selectedDate > maxDate) {
-            dateError.textContent = 'Please select a date from tomorrow up to 3 months in advance.';
+        if (selectedDate < today || selectedDate > maxDate) {
+            dateError.textContent = 'Please select a date up to 3 months in advance.';
             dateError.style.display = 'block';
             e.target.value = ''; // Clear invalid date
         }
@@ -831,7 +831,34 @@ function setupNumberSelects() {
         // If adult count changes, quantity dropdowns for menu items need update
         if (sel === adultSelect) {
                 document.querySelectorAll('.menu-item:not([data-category="addons"]) .quantity-select').forEach(qs => updateQuantityDropdown(qs));
-            updateSummary(); // Re-validate quantities in summary
+
+            // Special logic for dessert selection based on adult count
+            const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+            const originalMaxDesserts = 3; // Default max from config
+            const newMaxDesserts = (adultCount === 2) ? 2 : originalMaxDesserts;
+
+            if (courseConfig.desserts.maxSelections !== newMaxDesserts) {
+                courseConfig.desserts.maxSelections = newMaxDesserts;
+
+                // Reset selections for desserts if they exceed the new max
+                if (selectedItems.desserts.length > newMaxDesserts) {
+                    const itemsToKeep = selectedItems.desserts.slice(0, newMaxDesserts);
+                    const itemsToDeselect = selectedItems.desserts.slice(newMaxDesserts);
+                    
+                    selectedItems.desserts = itemsToKeep;
+
+                    itemsToDeselect.forEach(item => {
+                        const itemDiv = document.querySelector(`#desserts .menu-item[data-id="${item.id}"]`);
+                        if (itemDiv) {
+                            itemDiv.classList.remove('selected');
+                            const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+                            if (checkbox) checkbox.checked = false;
+                        }
+                    });
+                }
+                updateSelectionCount('desserts');
+            }
+            updateSummary(); // Re-validate quantities in summary and button states
         }
          // If adult count changes and main course is sharing, update its display rules
         if (sel === adultSelect && currentServingStyle === 'sharing') {
