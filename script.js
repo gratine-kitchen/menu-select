@@ -69,56 +69,56 @@ const itemQuantities = {};
 
 
 async function fetchMenuData() {
+    const PUBLISHED_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQp_lmQ3G1BBHVC5Lotsbtid6IO9kA83VGmKeI2e_Q31_LXtsFM8v2ZyvloRxo7FMixbu46ofyPq9JF/pub?gid=0&single=true&output=csv';
+    const timestamp = new Date().getTime();
+    const urlWithCacheBust = `${PUBLISHED_CSV_URL}&_=${timestamp}`;
+    console.log('Fetching menu data...');
+
+    // List of endpoints to try, including a direct attempt.
+    const endpoints = [
+        'https://corsproxy.io/?' + encodeURIComponent(urlWithCacheBust),
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(urlWithCacheBust),
+        'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(urlWithCacheBust),
+        'https://thingproxy.freeboard.io/fetch/' + urlWithCacheBust,
+        urlWithCacheBust // Direct attempt
+    ];
+
+    // Helper to fetch with a timeout to prevent hanging requests.
+    const fetchWithTimeout = async (url, timeout = 8000) => {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeout);
+
+        try {
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(id);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const text = await response.text();
+            if (!text || text.trim() === '') {
+                throw new Error(`Empty response`);
+            }
+            console.log(`Successfully fetched from: ${url.substring(0, 40)}...`);
+            return text;
+        } catch (error) {
+            clearTimeout(id);
+            // Log the specific error and re-throw to allow Promise.any to catch it as a failure.
+            console.log(`Fetch attempt failed for ${url.substring(0, 40)}...: ${error.message}`);
+            throw new Error(`Failed to fetch from ${url}`);
+        }
+    };
+
     try {
-        const PUBLISHED_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQp_lmQ3G1BBHVC5Lotsbtid6IO9kA83VGmKeI2e_Q31_LXtsFM8v2ZyvloRxo7FMixbu46ofyPq9JF/pub?gid=0&single=true&output=csv';
-        const timestamp = new Date().getTime();
-        const urlWithCacheBust = `${PUBLISHED_CSV_URL}&_=${timestamp}`;
-        console.log('Fetching menu data...');
+        // Race all fetch attempts. The first one to succeed wins.
+        const fetchPromises = endpoints.map(url => fetchWithTimeout(url));
+        const csvText = await Promise.any(fetchPromises);
 
-        const proxyServices = [
-            'https://corsproxy.io/?',
-            'https://api.allorigins.win/raw?url=',
-            'https://api.codetabs.com/v1/proxy?quest='
-        ];
-
-        let csvText = null;
-
-        for (const proxy of proxyServices) {
-            try {
-                const proxyUrl = proxy + encodeURIComponent(urlWithCacheBust);
-                console.log(`Trying proxy: ${proxy}`);
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for proxy ${proxy}`);
-                const text = await response.text();
-                if (!text || text.trim() === '') throw new Error(`Empty response received from proxy ${proxy}`);
-                csvText = text;
-                console.log('Successfully fetched CSV data through proxy');
-                break; 
-            } catch (error) {
-                console.log(`Failed with proxy ${proxy}:`, error.message);
-            }
-        }
-
-        if (!csvText) {
-            try {
-                console.log('Trying direct fetch as last resort...');
-                const response = await fetch(urlWithCacheBust);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status} for direct fetch`);
-                const text = await response.text();
-                if (!text || text.trim() === '') throw new Error('Empty response received from direct fetch');
-                csvText = text;
-                console.log('Successfully fetched CSV data directly');
-            } catch (error) {
-                console.log('Direct fetch failed:', error.message);
-                throw new Error('All fetch attempts failed. Please check your network or the CSV URL.');
-            }
-        }
-        
+        // PapaParse the successful response.
         return new Promise((resolve, reject) => {
             Papa.parse(csvText, {
                 header: true,
                 skipEmptyLines: true,
-                complete: function(results) {
+                complete: (results) => {
                     if (results.data && results.data.length > 0) {
                         console.log('Raw CSV data (first 3 rows):', results.data.slice(0, 3));
                         resolve(processCSVData(results.data));
@@ -126,7 +126,7 @@ async function fetchMenuData() {
                         reject(new Error('No data found in CSV after parsing.'));
                     }
                 },
-                error: function(error) {
+                error: (error) => {
                     console.error('PapaParse error:', error);
                     reject(new Error('Error parsing CSV data: ' + error.message));
                 }
@@ -134,17 +134,17 @@ async function fetchMenuData() {
         });
 
     } catch (error) {
-        console.error('Error fetching menu data:', error);
+        // This block catches if all promises in Promise.any fail, or if PapaParse rejects.
+        console.error('All menu data fetch attempts failed. This is expected if all proxies and the direct link are down.', error);
         const container = document.querySelector('.container');
         if (container) {
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error';
-            errorDiv.textContent = `Error loading menu data: ${error.message}. Please try refreshing the page.`;
-            // Clear loading messages before adding error
+            errorDiv.textContent = 'There was a problem loading the menu. This might be a temporary network issue. Please try refreshing the page.';
             document.querySelectorAll('.loading').forEach(el => el.remove());
             container.appendChild(errorDiv);
         }
-        return null;
+        return null; // Return null to signal failure to the caller
     }
 }
 
