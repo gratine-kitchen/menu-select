@@ -1218,7 +1218,8 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded, initializing menu builder...');
 
     const urlParams = new URLSearchParams(window.location.search);
-    isReadonly = urlParams.has('readonly');
+    // Case-insensitive check for 'readonly' parameter
+    isReadonly = [...urlParams.keys()].some(key => key.toLowerCase() === 'readonly');
 
     if (isReadonly) {
         applyReadonlyMode();
