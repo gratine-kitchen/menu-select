@@ -144,6 +144,16 @@ h1 {
     font-size: 0.85em;
 }
 
+/* Style for wine pairing info on the menu card */
+.wine-pairing-card-info {
+    font-size: 0.7em;
+    font-style: italic;
+    color: #005a9c; /* Same blue as summary for consistency */
+    margin-top: -40px; /* Pull it up into the space left by the description's margin-bottom */
+    margin-bottom: 45px; /* Maintain the bottom spacing for the checkbox/dropdown */
+    padding: 0 2px; /* Small padding for breathing room */
+}
+
 .summary {
     background: white;
     padding: 20px;
@@ -162,13 +172,6 @@ h1 {
 
 #selected-items strong {
     color: #2c3e50;
-}
-
-/* Style for the inline wine pairing info in the summary */
-.wine-pairing-info {
-    color: #005a9c; /* A distinct blue color */
-    font-size: 0.9em;
-    font-style: italic;
 }
 
 .total-price {

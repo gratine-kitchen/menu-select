@@ -254,11 +254,18 @@ function createMenuItem(item, category) {
     // Determine ribbon style
     const ribbonStyle = item.remarksColor ? `style="background-color: ${item.remarksColor};"` : '';
 
+    // Prepare wine pairing info for the card
+    let winePairingCardHTML = '';
+    if (item.winePairing) {
+        winePairingCardHTML = `<div class="wine-pairing-card-info">🍷: ${item.winePairing}</div>`;
+    }
+
     div.innerHTML = `
         <input type="checkbox" id="item-${item.id}" ${isChecked ? 'checked' : ''} style="z-index: 3;" ${isReadonly ? 'disabled' : ''}>
         <img src="${item.image}" alt="${item.name}" onerror="this.src='https://placehold.co/250x250/eeeeee/cccccc?text=No+Image'" class="menu-image">
         <h3>${item.name}${item.isSignature ? ' ⭐' : ''}</h3>
         <p>${item.description}${upgradePriceText ? `<br><b class="price-upgrade">${upgradePriceText}</b>` : ''}</p>
+        ${winePairingCardHTML}
         ${item.additionalRemarks ? `<div class="ribbon" ${ribbonStyle}><span>${item.additionalRemarks}</span></div>` : ''}
         ${quantityDropdownHTML}
     `;
@@ -518,12 +525,7 @@ function updateSummary() {
                 const quantity = getItemQuantity(item.id);
                 totalQuantityInCategory += quantity;
 
-                let winePairingInfo = '';
-                if (item.winePairing) {
-                    // Append wine pairing info inline, wrapped in a span for styling.
-                    winePairingInfo = ` <span class="wine-pairing-info">(🍷 Wine: ${item.winePairing})</span>`;
-                }
-                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${priceInfo}${winePairingInfo}</p>`;
+                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${priceInfo}</p>`;
             }
         });
         
