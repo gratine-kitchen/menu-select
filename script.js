@@ -118,6 +118,11 @@ async function fetchMenuData() {
             Papa.parse(csvText, {
                 header: true,
                 skipEmptyLines: true,
+                // Add transformHeader to trim whitespace from header keys.
+                // This prevents issues where a header like " WinePairing " doesn't match the expected "WinePairing" key.
+                transformHeader: header => {
+                    return header.trim();
+                },
                 complete: (results) => {
                     if (results.data && results.data.length > 0) {
                         console.log('Raw CSV data (first 3 rows):', results.data.slice(0, 3));
@@ -191,7 +196,8 @@ function processCSVData(csvData) {
             servingStyle: (row['ServingStyle'] || 'individual').toLowerCase().trim(),
             isSignature: ['TRUE', 'YES', '1'].includes(String(row.IsSignature).toUpperCase()),
             mealAvailability: (row['MealAvailability'] || 'Both').toLowerCase().trim(),
-            remarksColor: row.RemarksColor || null // Add this line
+            remarksColor: row.RemarksColor || null,
+            winePairing: row.WinePairing || '' // Read the new WinePairing column
         };
 
         const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
@@ -511,7 +517,13 @@ function updateSummary() {
                 }
                 const quantity = getItemQuantity(item.id);
                 totalQuantityInCategory += quantity;
-                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${priceInfo}</p>`;
+
+                let winePairingInfo = '';
+                if (item.winePairing) {
+                    // Append wine pairing info inline, wrapped in a span for styling.
+                    winePairingInfo = ` <span class="wine-pairing-info">(🍷 Wine: ${item.winePairing})</span>`;
+                }
+                html += `<p>• ${item.name} ${quantity > 0 ? `(x${quantity})` : ''} ${priceInfo}${winePairingInfo}</p>`;
             }
         });
         

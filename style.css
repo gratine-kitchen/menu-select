@@ -164,6 +164,13 @@ h1 {
     color: #2c3e50;
 }
 
+/* Style for the inline wine pairing info in the summary */
+.wine-pairing-info {
+    color: #005a9c; /* A distinct blue color */
+    font-size: 0.9em;
+    font-style: italic;
+}
+
 .total-price {
     font-size: 1.2em;
     font-weight: bold;
