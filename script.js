@@ -198,7 +198,7 @@ function processCSVData(csvData) {
             mealAvailability: (row['MealAvailability'] || 'Both').toLowerCase().trim(),
             remarksColor: row.RemarksColor || null,
             winePairing: row.WinePairing || '', // Read the new WinePairing column
-            winePairingRationale: row.WinePairingRationale || 'TBD' // Read new rationale, with "TBD" as placeholder
+            winePairingRationale: row.WinePairingRationale || '' // Read new rationale, defaulting to an empty string
         };
 
         const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
