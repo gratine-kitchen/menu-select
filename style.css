@@ -150,7 +150,7 @@ h1 {
     font-style: italic;
     color: #005a9c; /* Same blue as summary for consistency */
     margin-top: -40px; /* Pull it up into the space left by the description's margin-bottom */
-    margin-bottom: 20px; /* Maintain the bottom spacing for the checkbox/dropdown */
+    margin-bottom: 25px; /* Maintain the bottom spacing for the checkbox/dropdown */
     padding: 0 2px; /* Small padding for breathing room */
 }
 
