@@ -257,7 +257,7 @@ function createMenuItem(item, category) {
     // Prepare wine pairing info for the card
     let winePairingCardHTML = '';
     if (item.winePairing) {
-        winePairingCardHTML = `<div class="wine-pairing-card-info">🍷: ${item.winePairing}</div>`;
+        winePairingCardHTML = `<div class="wine-pairing-card-info">Suggested 🍷: ${item.winePairing}</div>`;
     }
 
     div.innerHTML = `
