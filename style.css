@@ -144,14 +144,47 @@ h1 {
     font-size: 0.85em;
 }
 
-/* Style for wine pairing info on the menu card */
+/* --- Wine Pairing Tooltip Styles --- */
+.wine-pairing-container {
+    position: relative; /* Needed for tooltip positioning */
+    margin-top: -40px;
+    margin-bottom: 20px;
+    padding: 0 2px;
+    cursor: pointer; /* Indicates it's clickable */
+}
+
 .wine-pairing-card-info {
     font-size: 0.8em;
     font-style: italic;
-    color: #005a9c; /* Same blue as summary for consistency */
-    margin-top: -40px; /* Pull it up into the space left by the description's margin-bottom */
-    margin-bottom: 20px; /* Maintain the bottom spacing for the checkbox/dropdown */
-    padding: 0 2px; /* Small padding for breathing room */
+    color: #005a9c;
+    line-height: 1.2; /* Add line-height for potentially wrapping text */
+}
+
+/* The tooltip text - hidden by default */
+.wine-pairing-container::after {
+    content: attr(data-tooltip); /* We will set this with JS */
+    position: absolute;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    z-index: 10;
+    bottom: 125%; /* Position above the text */
+    left: 50%;
+    margin-left: -100px; /* Use half of the width to center */
+    opacity: 0;
+    transition: opacity 0.3s;
+    visibility: hidden;
+    font-size: 0.9em;
+    font-style: normal;
+}
+
+/* Show the tooltip text when the 'show-tooltip' class is added */
+.wine-pairing-container.show-tooltip::after {
+    visibility: visible;
+    opacity: 1;
 }
 
 .summary {

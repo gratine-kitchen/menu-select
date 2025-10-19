@@ -197,7 +197,8 @@ function processCSVData(csvData) {
             isSignature: ['TRUE', 'YES', '1'].includes(String(row.IsSignature).toUpperCase()),
             mealAvailability: (row['MealAvailability'] || 'Both').toLowerCase().trim(),
             remarksColor: row.RemarksColor || null,
-            winePairing: row.WinePairing || '' // Read the new WinePairing column
+            winePairing: row.WinePairing || '', // Read the new WinePairing column
+            winePairingRationale: row.WinePairingRationale || 'TBD' // Read new rationale, with "TBD" as placeholder
         };
 
         const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
@@ -257,7 +258,11 @@ function createMenuItem(item, category) {
     // Prepare wine pairing info for the card
     let winePairingCardHTML = '';
     if (item.winePairing) {
-        winePairingCardHTML = `<div class="wine-pairing-card-info">Suggested 🍷: ${item.winePairing}</div>`;
+        // The data-tooltip attribute will hold the text for the CSS tooltip
+        winePairingCardHTML = `
+            <div class="wine-pairing-container" data-tooltip="${item.winePairingRationale}">
+                <span class="wine-pairing-card-info">🍷 Wine Pairing: ${item.winePairing} (Tap for details)</span>
+            </div>`;
     }
 
     div.innerHTML = `
@@ -270,23 +275,28 @@ function createMenuItem(item, category) {
         ${quantityDropdownHTML}
     `;
 
-    if (quantityDropdownHTML) { 
-        const selectElement = div.querySelector('.quantity-select');
-        if (category === 'addons') {
-            // For addons, options are pre-built. Just restore value if it exists.
-            const quantity = getItemQuantity(item.id);
-            if (quantity > 0) {
-                selectElement.value = quantity;
-            }
-        } else {
-            updateQuantityDropdown(selectElement);
-        }
-    }
-    
     const urlParams = new URLSearchParams(window.location.search);
     const mealType = (urlParams.get('meal') || 'dinner').toLowerCase();
+
     if (item.mealAvailability !== 'both' && item.mealAvailability !== mealType) {
         div.style.display = 'none';
+    }
+
+    // Add click listener for the wine pairing tooltip
+    const winePairingContainer = div.querySelector('.wine-pairing-container');
+    if (winePairingContainer) {
+        winePairingContainer.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent the menu item from being selected
+
+            // Close any other open tooltips first
+            document.querySelectorAll('.wine-pairing-container.show-tooltip').forEach(el => {
+                if (el !== winePairingContainer) {
+                    el.classList.remove('show-tooltip');
+                }
+            });
+            // Then toggle the current one
+            winePairingContainer.classList.toggle('show-tooltip');
+        });
     }
 
     const checkbox = div.querySelector('input[type="checkbox"]');
@@ -1317,4 +1327,13 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.dev-tools').forEach(el => el.style.display = 'block');
         document.querySelectorAll('.test-btn').forEach(el => el.style.display = 'inline-block');
     }
+
+    // Add a global click listener to close any open tooltips
+    document.body.addEventListener('click', (e) => {
+        if (!e.target.closest('.wine-pairing-container')) {
+            document.querySelectorAll('.wine-pairing-container.show-tooltip').forEach(el => {
+                el.classList.remove('show-tooltip');
+            });
+        }
+    });
 });
