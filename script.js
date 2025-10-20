@@ -258,10 +258,17 @@ function createMenuItem(item, category) {
     // Prepare wine pairing info for the card
     let winePairingCardHTML = '';
     if (item.winePairing) {
+        const hasRationale = item.winePairingRationale && item.winePairingRationale.trim() !== '';
+        const containerClass = hasRationale ? 'wine-pairing-container' : 'wine-pairing-container disabled';
+        const tooltipAttr = hasRationale ? `data-tooltip="${item.winePairingRationale}"` : '';
+        const displayText = hasRationale
+            ? `🍷 Wine Pairing: ${item.winePairing} (Tap for more details)`
+            : `🍷 Wine Pairing: ${item.winePairing}`;
+
         // The data-tooltip attribute will hold the text for the CSS tooltip
         winePairingCardHTML = `
-            <div class="wine-pairing-container" data-tooltip="${item.winePairingRationale}">
-                <span class="wine-pairing-card-info">🍷 Wine Pairing: ${item.winePairing} (Tap for details)</span>
+            <div class="${containerClass}" ${tooltipAttr}>
+                <span class="wine-pairing-card-info">${displayText}</span>
             </div>`;
     }
 
@@ -283,7 +290,7 @@ function createMenuItem(item, category) {
     }
 
     // Add click listener for the wine pairing tooltip
-    const winePairingContainer = div.querySelector('.wine-pairing-container');
+    const winePairingContainer = div.querySelector('.wine-pairing-container:not(.disabled)');
     if (winePairingContainer) {
         winePairingContainer.addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent the menu item from being selected
