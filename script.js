@@ -262,8 +262,8 @@ function createMenuItem(item, category) {
         const containerClass = hasRationale ? 'wine-pairing-container' : 'wine-pairing-container disabled';
         const tooltipAttr = hasRationale ? `data-tooltip="${item.winePairingRationale}"` : '';
         const displayText = hasRationale
-            ? `🍷 Wine Pairing: ${item.winePairing} (Tap for more details)`
-            : `🍷 Wine Pairing: ${item.winePairing}`;
+            ? `🍷 Suggested Wine Pairing: ${item.winePairing} (Tap for more details)`
+            : `🍷 Suggested Wine Pairing: ${item.winePairing}`;
 
         // The data-tooltip attribute will hold the text for the CSS tooltip
         winePairingCardHTML = `
