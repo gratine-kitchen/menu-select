@@ -257,7 +257,7 @@ function createMenuItem(item, category) {
 
     // Prepare wine pairing info for the card
     let winePairingCardHTML = '';
-    if (item.winePairing) {
+    if (item.winePairing && !isReadonly) {
         const hasRationale = item.winePairingRationale && item.winePairingRationale.trim() !== '';
         const containerClass = hasRationale ? 'wine-pairing-container' : 'wine-pairing-container disabled';
         const tooltipAttr = hasRationale ? `data-tooltip="${item.winePairingRationale}"` : '';
