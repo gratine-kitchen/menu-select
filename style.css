@@ -129,12 +129,6 @@ h1 {
     color: #666;
     margin-bottom: 45px;
     line-height: 1.3;
-    max-height: 3.9em; /* (0.85em * 1.3 * 3 lines) approx */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
 }
 
 .price-upgrade {
