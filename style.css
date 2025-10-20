@@ -142,16 +142,19 @@ h1 {
 .wine-pairing-container {
     position: relative; /* Needed for tooltip positioning */
     margin-top: -40px;
-    margin-bottom: 30px;
-    padding: 0 2px;
+    margin-bottom: 30px; /* Adjusted for new padding */
+    padding: 6px 10px; /* Added padding for button look */
     cursor: pointer; /* Indicates it's clickable */
+    background-color: rgba(106, 90, 205, 0.1); /* Transparent purple (SlateBlue) */
+    border-radius: 8px; /* Rounded corners */
+    transition: background-color 0.2s ease;
 }
 
 .wine-pairing-card-info {
     font-size: 0.8em;
     font-style: italic;
-    color: #005a9c;
-    line-height: 1.2; /* Add line-height for potentially wrapping text */
+    color: #483D8B; /* Darker purple for better contrast (DarkSlateBlue) */
+    line-height: 1.2;
 }
 
 /* The tooltip text - hidden by default */
