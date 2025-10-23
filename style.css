@@ -148,6 +148,7 @@ h1 {
     background-color: rgba(106, 90, 205, 0.1); /* Transparent purple (SlateBlue) */
     border-radius: 8px; /* Rounded corners */
     transition: background-color 0.2s ease;
+    display: none; /* Hidden by default, JS will show it if enabled */
 }
 
 /* Style for when there is no rationale, making it non-interactive */
