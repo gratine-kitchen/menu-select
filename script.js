@@ -283,7 +283,7 @@ function createMenuItem(item, category) {
     `;
 
     const urlParams = new URLSearchParams(window.location.search);
-    const mealType = (urlParams.get('meal') || 'dinner').toLowerCase();
+    const mealType = (urlParams.get('Meal') || 'dinner').toLowerCase();
 
     if (item.mealAvailability !== 'both' && item.mealAvailability !== mealType) {
         div.style.display = 'none';
@@ -709,7 +709,7 @@ function setupServingStyleControls() {
 
 function updateTitleBasedOnQueryParam() {
     const urlParams = new URLSearchParams(window.location.search);
-    const mealType = urlParams.get('meal');
+    const mealType = urlParams.get('Meal');
     populateCourseCountDropdown(mealType && mealType.toLowerCase() === 'lunch' ? 'lunch' : 'dinner');
 }
 
@@ -814,7 +814,7 @@ async function initializeMenu() {
 function updateBookingDateLabel() { // This function seems to be for a hidden meal input, which is not present.
                                    // The label text is static in HTML. If dynamic update is needed, HTML needs adjustment.
     const urlParams = new URLSearchParams(window.location.search);
-    const mealType = (urlParams.get('meal') || 'dinner').toLowerCase();
+    const mealType = (urlParams.get('Meal') || 'dinner').toLowerCase();
     // Example: If you had <span id="meal-type-display"> in your label:
     // const mealTypeDisplayElement = document.getElementById('meal-type-display');
     // if (mealTypeDisplayElement) mealTypeDisplayElement.textContent = mealType.charAt(0).toUpperCase() + mealType.slice(1);
