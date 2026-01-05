@@ -23,7 +23,7 @@ const courseConfig = {
         required: true
     },
     desserts: {
-        maxSelections: 3,
+        maxSelections: 2,
         allowMultiple: true,
         displayName: 'Desserts',
         required: true
