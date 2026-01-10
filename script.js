@@ -874,32 +874,32 @@ function setupNumberSelects() {
         if (sel === adultSelect) {
                 document.querySelectorAll('.menu-item:not([data-category="addons"]) .quantity-select').forEach(qs => updateQuantityDropdown(qs));
 
-            // Special logic for dessert selection based on adult count
-            const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
-            const originalMaxDesserts = 3; // Default max from config
-            const newMaxDesserts = (adultCount === 2) ? 2 : originalMaxDesserts;
+            // // Special logic for dessert selection based on adult count
+            // const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+            // const originalMaxDesserts = courseConfig.desserts.maxSelections; // Read from config
+            // const newMaxDesserts = (adultCount === 2) ? 2 : originalMaxDesserts;
 
-            if (courseConfig.desserts.maxSelections !== newMaxDesserts) {
-                courseConfig.desserts.maxSelections = newMaxDesserts;
+            // if (courseConfig.desserts.maxSelections !== newMaxDesserts) {
+            //     courseConfig.desserts.maxSelections = newMaxDesserts;
 
-                // Reset selections for desserts if they exceed the new max
-                if (selectedItems.desserts.length > newMaxDesserts) {
-                    const itemsToKeep = selectedItems.desserts.slice(0, newMaxDesserts);
-                    const itemsToDeselect = selectedItems.desserts.slice(newMaxDesserts);
+            //     // Reset selections for desserts if they exceed the new max
+            //     if (selectedItems.desserts.length > newMaxDesserts) {
+            //         const itemsToKeep = selectedItems.desserts.slice(0, newMaxDesserts);
+            //         const itemsToDeselect = selectedItems.desserts.slice(newMaxDesserts);
                     
-                    selectedItems.desserts = itemsToKeep;
+            //         selectedItems.desserts = itemsToKeep;
 
-                    itemsToDeselect.forEach(item => {
-                        const itemDiv = document.querySelector(`#desserts .menu-item[data-id="${item.id}"]`);
-                        if (itemDiv) {
-                            itemDiv.classList.remove('selected');
-                            const checkbox = itemDiv.querySelector('input[type="checkbox"]');
-                            if (checkbox) checkbox.checked = false;
-                        }
-                    });
-                }
-                updateSelectionCount('desserts');
-            }
+            //         itemsToDeselect.forEach(item => {
+            //             const itemDiv = document.querySelector(`#desserts .menu-item[data-id="${item.id}"]`);
+            //             if (itemDiv) {
+            //                 itemDiv.classList.remove('selected');
+            //                 const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+            //                 if (checkbox) checkbox.checked = false;
+            //             }
+            //         });
+            //     }
+            //     updateSelectionCount('desserts');
+            // }
             updateSummary(); // Re-validate quantities in summary and button states
         }
          // If adult count changes and main course is sharing, update its display rules
