@@ -7,32 +7,37 @@ const courseConfig = {
     soups: {
         maxSelections: 2,
         allowMultiple: true,
-        displayName: 'Soups',
-        required: true
+        displayName: 'Soups', // e.g. "Please select up to 2 soup items for your guests to choose from..."
+        required: true,
+        summaryCaption: '[Choose one per guest]'
     },
     starters: {
         maxSelections: 2, // This will be updated by courseCountChange
         allowMultiple: true,
-        displayName: 'Starters',
-        required: true
+        displayName: 'Starters', // e.g. "Our starters are mainly designed to be shared and everyone will be served the same."
+        required: true,
+        summaryCaption: '[To share among your table]'
     },
     mains: {
         maxSelections: 2, // Can be 1 or 2 for sharing
         allowMultiple: true,
-        displayName: 'Main Courses',
-        required: true
+        displayName: 'Main Courses', // e.g. "For the main course, you have the option of individual plating or family-style."
+        required: true,
+        summaryCaption: '' // Dynamic based on serving style
     },
     desserts: {
         maxSelections: 2,
         allowMultiple: true,
-        displayName: 'Desserts',
-        required: true
+        displayName: 'Desserts', // e.g. "You can select up to 2 dessert items for your guests to choose from..."
+        required: true,
+        summaryCaption: '[Choose one per guest]'
     },
     addons: {
         maxSelections: 99, // Effectively unlimited for practical purposes
         allowMultiple: true,
         displayName: 'Add-ons',
-        required: false // Users can select zero add-ons
+        required: false, // Users can select zero add-ons
+        summaryCaption: ''
     }
 };
 
@@ -527,7 +532,17 @@ function updateSummary() {
             return;
         }
 
-        html += `<p><strong>${categoryDisplayName}:</strong></p>`;
+        let caption = config.summaryCaption || '';
+        if (category === 'mains') {
+            if (currentServingStyle === 'individual') {
+                caption = '[Choose one per guest]';
+            } else if (currentServingStyle === 'sharing') {
+                caption = '[To share among the table]';
+            }
+        }
+
+        html += `<p><strong>${categoryDisplayName}</strong> ${caption ? `<span style="font-weight: normal; font-style: italic; font-size: 0.9em; color: blue;">${caption}</span>` : ''}:</p>`;
+
         let totalQuantityInCategory = 0;
         const categoryItemsForSummary = Array.isArray(items) ? items : [items];
 
