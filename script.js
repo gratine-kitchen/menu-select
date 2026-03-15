@@ -407,7 +407,7 @@ function updateSelectionCount(category) {
     const maxCount = config.maxSelections;
     
     if (category === 'starters') {
-        countElement.textContent = `Please select ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`;
+        countElement.textContent = `Please select ${maxCount} ${config.displayName.toLowerCase()} for sharing (${selectedCount} selected)`;
     } else {
         countElement.textContent =  (category === 'addons' ? '' : `Please select up to ${maxCount} ${config.displayName.toLowerCase()} (${selectedCount} selected)`);
     }
