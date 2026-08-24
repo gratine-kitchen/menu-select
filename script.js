@@ -203,7 +203,8 @@ function processCSVData(csvData) {
             mealAvailability: (row['MealAvailability'] || 'Both').toLowerCase().trim(),
             remarksColor: row.RemarksColor || null,
             winePairing: row.WinePairing || '', // Read the new WinePairing column
-            winePairingRationale: row.WinePairingRationale || '' // Read new rationale, defaulting to an empty string
+            winePairingRationale: row.WinePairingRationale || '', // Read new rationale, defaulting to an empty string
+            historyVideoUrl: row.HistoryVideoURL ? row.HistoryVideoURL.trim() : ''
         };
 
         const categoryKey = row.Category.toLowerCase().replace(/\s+/g, '');
@@ -287,6 +288,20 @@ function createMenuItem(item, category) {
         ${quantityDropdownHTML}
     `;
 
+    if (item.historyVideoUrl) {
+        const historyVideoButton = document.createElement('button');
+        historyVideoButton.type = 'button';
+        historyVideoButton.className = 'history-video-button';
+        historyVideoButton.setAttribute('aria-label', `Watch the origin story for ${item.name}`);
+        historyVideoButton.innerHTML = '<span>Dish history</span><img src="images/HistoryVideoIcon1.png" alt="">';
+        div.querySelector('h3').appendChild(historyVideoButton);
+        historyVideoButton.addEventListener('click', event => {
+            event.stopPropagation();
+            openHistoryVideoModal(item.historyVideoUrl, item.name, historyVideoButton);
+        });
+        div.appendChild(historyVideoButton);
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const mealType = (urlParams.get('Meal') || 'dinner').toLowerCase();
 
@@ -333,7 +348,7 @@ function createMenuItem(item, category) {
 
     div.addEventListener('click', (event) => {
         if (isReadonly) return;
-        if (event.target.matches('input[type="checkbox"]') || event.target.matches('select.quantity-select') || event.target.matches('select.quantity-select option')) {
+        if (event.target.matches('input[type="checkbox"]') || event.target.matches('select.quantity-select') || event.target.matches('select.quantity-select option') || event.target.closest('.history-video-button')) {
             return; // Let the specific handlers work
         }
         if (!checkbox.disabled) {
@@ -343,6 +358,68 @@ function createMenuItem(item, category) {
     });
     
     return div;
+}
+
+function getYouTubeVideoId(value) {
+    const input = value.trim();
+    if (/^[A-Za-z0-9_-]{11}$/.test(input)) return input;
+
+    try {
+        const url = new URL(input);
+        if (url.hostname === 'youtu.be') return url.pathname.slice(1, 12);
+        if (url.hostname.endsWith('youtube.com')) {
+            if (url.pathname === '/watch') return url.searchParams.get('v');
+            if (url.pathname.startsWith('/shorts/')) return url.pathname.split('/')[2];
+            if (url.pathname.startsWith('/embed/')) return url.pathname.split('/')[2];
+        }
+    } catch (error) {
+        console.warn('Invalid history video URL:', value);
+    }
+
+    return '';
+}
+
+function openHistoryVideoModal(videoUrl, itemName, triggerButton) {
+    const videoId = getYouTubeVideoId(videoUrl);
+    if (!videoId) {
+        console.warn(`Unable to parse history video URL for ${itemName}:`, videoUrl);
+        return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'history-video-overlay';
+    overlay.innerHTML = `
+        <div class="history-video-modal" role="dialog" aria-modal="true" aria-labelledby="history-video-title">
+            <div class="history-video-header">
+                <h2 id="history-video-title"></h2>
+                <button type="button" class="history-video-close" aria-label="Close video">&times;</button>
+            </div>
+            <div class="history-video-frame">
+                <iframe
+                    src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1"
+                    title="Origin story for ${itemName}"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+            </div>
+        </div>`;
+    overlay.querySelector('#history-video-title').textContent = `${itemName}: origin story`;
+    document.body.appendChild(overlay);
+
+    const closeModal = () => {
+        overlay.remove();
+        document.removeEventListener('keydown', handleKeydown);
+        triggerButton?.focus();
+    };
+    const handleKeydown = event => {
+        if (event.key === 'Escape') closeModal();
+    };
+
+    overlay.querySelector('.history-video-close').addEventListener('click', closeModal);
+    overlay.addEventListener('click', event => {
+        if (event.target === overlay) closeModal();
+    });
+    document.addEventListener('keydown', handleKeydown);
+    overlay.querySelector('.history-video-close').focus();
 }
 
 function updateQuantityDropdown(selectElement) {

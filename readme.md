@@ -34,6 +34,13 @@ Then open:
 - `script.js` - interaction logic
 - `images/` - image assets
 
+## Menu History Videos
+
+Add a `HistoryVideoURL` column to the published Google Sheet for any dish with
+an origin-story video. The value can be a YouTube Shorts URL, a standard
+YouTube watch URL, a short `youtu.be` URL, or an 11-character YouTube video ID.
+Rows without a value do not display the video button.
+
 ## Stop the Local Server
 
 Press `Ctrl + C` in the terminal where the server is running.
