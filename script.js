@@ -1217,18 +1217,18 @@ async function loadAppVersion() {
     if (!versionElement) return;
 
     try {
-        const response = await fetch('https://api.github.com/repos/gratine-kitchen/menu-select/commits/main', {
-            headers: { Accept: 'application/vnd.github+json' },
+        const response = await fetch(`version.json?cache=${Date.now()}`, {
             cache: 'no-store'
         });
-        if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+        if (!response.ok) throw new Error(`Version file returned ${response.status}`);
 
-        const commit = await response.json();
-        const commitId = typeof commit.sha === 'string' ? commit.sha.slice(0, 7) : '';
-        versionElement.textContent = commitId ? `Version: ${commitId}` : 'Version: unavailable';
+        const version = await response.json();
+        versionElement.textContent = version.release
+            ? `Release: ${version.release}`
+            : 'Release: unavailable';
     } catch (error) {
-        console.warn('Unable to load the latest app version:', error);
-        versionElement.textContent = 'Version: unavailable';
+        console.warn('Unable to load the app release version:', error);
+        versionElement.textContent = 'Release: unavailable';
     }
 }
 

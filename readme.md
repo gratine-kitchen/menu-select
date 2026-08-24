@@ -41,6 +41,16 @@ an origin-story video. The value can be a YouTube Shorts URL, a standard
 YouTube watch URL, a short `youtu.be` URL, or an 11-character YouTube video ID.
 Rows without a value do not display the video button.
 
+## GitHub Pages Deployment
+
+The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` generates
+`version.json` during each deployment. The footer displays the resulting
+release version in the format `Release: YYYY.MM.DD-build.N`.
+
+In the repository settings, set **Pages > Build and deployment > Source** to
+**GitHub Actions**. Opening the app directly from `index.html` will show
+`Release: unavailable` because `version.json` is created during deployment.
+
 ## Stop the Local Server
 
 Press `Ctrl + C` in the terminal where the server is running.
