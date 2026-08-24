@@ -294,7 +294,7 @@ function createMenuItem(item, category) {
         historyVideoButton.className = 'history-video-button';
         historyVideoButton.setAttribute('aria-label', `Watch the origin story for ${item.name}`);
         historyVideoButton.setAttribute('data-tooltip', 'Click to watch the dish origin story');
-        historyVideoButton.innerHTML = '<span>Dish history</span><img src="images/HistoryVideoIcon1.png" alt="">';
+        historyVideoButton.innerHTML = '<span>Dish story</span><img src="images/HistoryVideoIcon1.png" alt="">';
         historyVideoButton.addEventListener('click', event => {
             event.stopPropagation();
             openHistoryVideoModal(item.historyVideoUrl, item.name, historyVideoButton);

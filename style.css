@@ -8,7 +8,7 @@ body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
     padding: 20px;
-    background-color: #dcd3df;
+    background-color: #767377;
 }
 
 .container {
@@ -145,7 +145,7 @@ h1 {
     margin-bottom: 30px; /* Adjusted for new padding */
     padding: 6px 10px; /* Added padding for button look */
     cursor: pointer; /* Indicates it's clickable */
-    background-color: rgba(106, 90, 205, 0.1); /* Transparent purple (SlateBlue) */
+    background-color: #F5F1E8;
     border-radius: 8px; /* Rounded corners */
     transition: background-color 0.2s ease;
     /* display: none; /* Hidden by default, JS will show it if enabled */
@@ -159,7 +159,7 @@ h1 {
 .wine-pairing-card-info {
     font-size: 0.8em;
     font-style: italic;
-    color: #483D8B; /* Darker purple for better contrast (DarkSlateBlue) */
+    color: #67635f;
     line-height: 1.2;
 }
 
@@ -229,7 +229,7 @@ h1 {
 }
 
 .booking-form {
-    background-color: #f4eff6;
+    background-color: #F5F1E8;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 30px;
