@@ -45,7 +45,8 @@ Rows without a value do not display the video button.
 
 The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` generates
 `version.json` during each deployment. The footer displays the resulting
-release version in the format `Release: YYYY.MM.DD-build.N`.
+release version in the format `Release: YYYY.MM.DD-<short-commit-id>`.
+For example: `Release: 2026.08.24-abc1234`.
 
 In the repository settings, set **Pages > Build and deployment > Source** to
 **GitHub Actions**. Opening the app directly from `index.html` will show

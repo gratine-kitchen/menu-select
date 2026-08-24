@@ -32,7 +32,7 @@ jobs:
           mkdir site
           rsync -a --exclude='.git' --exclude='.github' --exclude='.vscode' --exclude='site' ./ site/
           release_date=$(date -u +%Y.%m.%d)
-          release_version="${release_date}-build.${GITHUB_RUN_NUMBER}"
+          release_version="${release_date}-${GITHUB_SHA:0:7}"
           printf '{"release":"%s","commit":"%.7s"}\n' "$release_version" "$GITHUB_SHA" > site/version.json
 
       - name: Upload site artifact
