@@ -293,12 +293,13 @@ function createMenuItem(item, category) {
         historyVideoButton.type = 'button';
         historyVideoButton.className = 'history-video-button';
         historyVideoButton.setAttribute('aria-label', `Watch the origin story for ${item.name}`);
+        historyVideoButton.setAttribute('data-tooltip', 'Watch the dish origin story');
         historyVideoButton.innerHTML = '<span>Dish history</span><img src="images/HistoryVideoIcon1.png" alt="">';
-        div.querySelector('h3').appendChild(historyVideoButton);
         historyVideoButton.addEventListener('click', event => {
             event.stopPropagation();
             openHistoryVideoModal(item.historyVideoUrl, item.name, historyVideoButton);
         });
+        div.appendChild(historyVideoButton);
     }
 
     const urlParams = new URLSearchParams(window.location.search);
