@@ -396,7 +396,7 @@ function openHistoryVideoModal(videoUrl, itemName, triggerButton) {
             </div>
             <div class="history-video-frame">
                 <iframe
-                    src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1&mute=1&playsinline=1"
+                    src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0&modestbranding=1&autoplay=1&playsinline=1"
                     title="Origin story for ${itemName}"
                     allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen></iframe>
