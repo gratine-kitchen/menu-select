@@ -299,7 +299,6 @@ function createMenuItem(item, category) {
             event.stopPropagation();
             openHistoryVideoModal(item.historyVideoUrl, item.name, historyVideoButton);
         });
-        div.appendChild(historyVideoButton);
     }
 
     const urlParams = new URLSearchParams(window.location.search);
