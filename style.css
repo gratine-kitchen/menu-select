@@ -733,6 +733,16 @@ input[type="date"] {
     border: 0;
 }
 
+.app-version {
+    max-width: 1200px;
+    margin: 8px auto 0;
+    padding: 0 20px 12px;
+    color: #8a8a8a;
+    font-family: Arial, sans-serif;
+    font-size: 0.9em;
+    text-align: left;
+}
+
 @media (max-height: 600px) {
     .history-video-modal {
         width: auto;

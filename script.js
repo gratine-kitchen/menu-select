@@ -1212,6 +1212,26 @@ function applyReadonlyMode() {
     });
 }
 
+async function loadAppVersion() {
+    const versionElement = document.getElementById('app-version');
+    if (!versionElement) return;
+
+    try {
+        const response = await fetch('https://api.github.com/repos/gratine-kitchen/menu-select/commits/main', {
+            headers: { Accept: 'application/vnd.github+json' },
+            cache: 'no-store'
+        });
+        if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+
+        const commit = await response.json();
+        const commitId = typeof commit.sha === 'string' ? commit.sha.slice(0, 7) : '';
+        versionElement.textContent = commitId ? `Version: ${commitId}` : 'Version: unavailable';
+    } catch (error) {
+        console.warn('Unable to load the latest app version:', error);
+        versionElement.textContent = 'Version: unavailable';
+    }
+}
+
 // --- Email and WhatsApp Logic ---
 (function() {
     // Ensure EmailJS public key is set here
@@ -1339,6 +1359,7 @@ function sendWhatsApp() {
 // --- DOMContentLoaded ---
 window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded, initializing menu builder...');
+    loadAppVersion();
 
     const urlParams = new URLSearchParams(window.location.search);
     // Case-insensitive check for 'readonly' parameter
