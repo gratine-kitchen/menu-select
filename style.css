@@ -592,7 +592,7 @@ input[type="date"] {
     vertical-align: middle;
     border: 0;
     border-radius: 4px;
-    background: #6c757d;
+    background: #814507;
     cursor: pointer;
     color: white;
     font-family: 'Montserrat', sans-serif;
@@ -649,10 +649,8 @@ input[type="date"] {
 .history-video-button:hover,
 .history-video-button:focus-visible {
     animation: none;
-    background: #5a6268;
+    background: #bf6914;
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
-    outline: 2px solid #3498db;
-    outline-offset: 2px;
 }
 
 @keyframes history-button-pulse {
