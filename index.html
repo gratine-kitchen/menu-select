@@ -32,29 +32,46 @@
             <img src="images/Gratine menu - Options Jun2025.png" alt="Menu Options" style="max-width: 100%; height: auto; margin-top: 15px;">
         </div>
 
+        <div class="language-selector">
+            <button type="button" id="language-toggle" class="language-toggle" aria-expanded="false" aria-controls="language-panel">
+                <img src="images/LanguageSelectorIcon.png" alt="Language" class="language-toggle-icon" data-i18n-alt="languageAlt">
+                <span id="current-language-label">English</span>
+                <span class="language-toggle-arrow" aria-hidden="true">⌄</span>
+            </button>
+            <div id="language-panel" class="language-panel" hidden>
+                <p class="language-panel-title" data-i18n="chooseLanguage">Choose language</p>
+                <button type="button" class="language-option" data-language="en" data-i18n="english">English</button>
+                <button type="button" class="language-option" data-language="zh-HK" data-i18n="chineseHongKong">繁體中文（香港）</button>
+            </div>
+            <select id="language-select" aria-label="Language" data-i18n-aria-label="language" hidden>
+                <option value="en">English</option>
+                <option value="zh-HK">繁體中文（香港）</option>
+            </select>
+        </div>
+
         <!-- Development Only - Start -->
         <div class="dev-tools">
             <button id="test-data-main" class="test-btn">Populate Test Data</button>
             <div class="button-group" style="margin-top: 10px;">
-                <button id="send-email-top" class="send-email-btn" style="display: none;">Send Menu Selection (Top)</button>
-                <button id="send-whatsapp-top" class="whatsapp-btn">Send via WhatsApp (Top)</button>
+                <button id="send-email-top" class="send-email-btn" style="display: none;" data-i18n="sendMenuTop">Send Menu Selection (Top)</button>
+                <button id="send-whatsapp-top" class="whatsapp-btn" data-i18n="submitWhatsAppTop">Send via WhatsApp (Top)</button>
             </div>
         </div>
         <!-- Development Only - End -->
         <div class="booking-form">
-            <h2 class="course-title">Reservation Details</h2>
+            <h2 class="course-title" data-i18n="reservationDetails">Reservation Details</h2>
             <div class="form-group">
-                <label for="customer-name" class="required-field">Your name:</label>
+                <label for="customer-name" class="required-field" data-i18n="yourName">Your name:</label>
                 <input type="text" id="customer-name" name="customer-name" required>
             </div>
 
             <div class="form-group">
-                <label for="contact-number" class="required-field">Your contact number:</label>
+                <label for="contact-number" class="required-field" data-i18n="contactNumber">Your contact number:</label>
                 <input type="tel" id="contact-number" name="contact-number" required>
             </div>
 
             <div class="form-group">
-                <label for="booking-date" class="required-field">Booking date:</label>
+                <label for="booking-date" class="required-field" data-i18n="bookingDate">Booking date:</label>
                 <input type="date" id="booking-date" name="booking-date" required placeholder="Select date">
                 <!-- <label for="booking-date" class="required-field">Booking Date: (<span id="meal-type">Dinner</span>)</label>
                 <input type="hidden" id="meal" name="meal" value="dinner"> -->
@@ -63,28 +80,28 @@
             </div>
 
             <div class="form-group">
-                <label for="arrival-time" class="required-field">Arrival time:</label>
-                <input type="text" id="arrival-time" name="arrival-time" required placeholder="e.g. Around 7pm">
+                <label for="arrival-time" class="required-field" data-i18n="arrivalTime">Arrival time:</label>
+                <input type="text" id="arrival-time" name="arrival-time" required placeholder="e.g. Around 7pm" data-i18n-placeholder="arrivalTimePlaceholder">
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="adult-count" class="required-field">Number of Adults 👩🏻:</label>
+                    <label for="adult-count" class="required-field" data-i18n="adults">Number of Adults 👩🏻:</label>
                     <select id="adult-count" name="adult-count" required>
-                        <option value="" disabled selected>Select number of adults</option>
+                        <option value="" disabled selected data-i18n="selectAdults">Select number of adults</option>
                     </select>
                 </div>
                 <span class="error-message" id="adult-count-error"></span>
 
                 <div class="form-group">
-                    <label for="kid-count">Number of Children 🧒🏻: (age 5 to 12)</label>
+                    <label for="kid-count" data-i18n="children">Number of Children 🧒🏻: (age 5 to 12)</label>
                     <select id="kid-count" name="kid-count">
                         <option value="0" selected>0</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="toddler-count">Number of Toddlers 👶🏻: (age 4 or below)</label>
+                    <label for="toddler-count" data-i18n="toddlers">Number of Toddlers 👶🏻: (age 4 or below)</label>
                     <select id="toddler-count" name="toddler-count">
                         <option value="0" selected>0</option>
                     </select>
@@ -93,45 +110,45 @@
 
             <!-- First, update the course count dropdown to have a proper initial value -->
             <div class="form-group course-count-group">
-                <label for="course-count" class="required-field">Please choose the number of menu courses:</label>
+                <label for="course-count" class="required-field" data-i18n="menuCourses">Please choose the number of menu courses:</label>
                 <select id="course-count" name="course-count" required>
                 </select>
             </div>
-            <p style="font-size: 0.8em; font-style: italic; color: #666; text-align: left; margin-top: -5px; margin-bottom: 15px;">Price includes tea/coffee, free corkage & cake-cutting. Subjects to 10% service fee.</p>
+            <p style="font-size: 0.8em; font-style: italic; color: #666; text-align: left; margin-top: -5px; margin-bottom: 15px;" data-i18n="priceNote">Price includes tea/coffee, free corkage & cake-cutting. Subject to 10% service fee.</p>
         </div>
         
         <!-- Course sections follow -->
         <div class="course-section">
-            <h2 class="course-title">Soups</h2>
-            <p class="course-description">Please select up to 2 soup items for your guests to choose from...</p>
+            <h2 class="course-title" data-i18n="soups">Soups</h2>
+            <p class="course-description" data-i18n="soupsDescription">Please select up to 2 soup items for your guests to choose from...</p>
             <div class="selection-count" id="soups-count"></div>
             <span class="error-message" id="soups-quantity-error"></span>
             <div class="menu-items" id="soups"></div>
         </div>
         
         <div class="course-section">
-            <h2 class="course-title">Starters</h2>
-            <p class="course-description">Our starters are mainly designed to be shared and everyone will be served the same. We have quite a large variety of starters... you can savor more of them by choosing menu with more courses. :-)</p>
+            <h2 class="course-title" data-i18n="starters">Starters</h2>
+            <p class="course-description" data-i18n="startersDescription">Our starters are mainly designed to be shared and everyone will be served the same. We have quite a large variety of starters... you can savor more of them by choosing a menu with more courses. :-)</p>
             <div class="selection-count" id="starters-count"></div>
             <span class="error-message" id="starters-quantity-error"></span>
             <div class="menu-items" id="starters"></div>
         </div>
 
         <div class="course-section">
-            <h2 class="course-title">Main Courses</h2>
-            <p class="course-description">For the main course, you have the option of individual plating or family-style. While individual plating is more common... family-style sharing can be more cozy with dish such as Signature Meat Platter where everyone can savor more than one choice of meat.</p>
+            <h2 class="course-title" data-i18n="mains">Main Courses</h2>
+            <p class="course-description" data-i18n="mainsDescription">For the main course, you have the option of individual plating or family-style. While individual plating is more common... family-style sharing can be cozier with dishes such as Signature Meat Platter where everyone can savor more than one choice of meat.</p>
             <div class="serving-style-selection">
                 <label class="radio-label">
                     <input type="radio" name="serving-style" value="individual" checked>
-                    <span>Individually Served</span>
+                    <span data-i18n="individual">Individually Served</span>
                 </label>
                 <label class="radio-label">
                     <input type="radio" name="serving-style" value="sharing">
-                    <span>Family-Style Sharing</span>
+                    <span data-i18n="sharing">Family-Style Sharing</span>
                 </label>
             </div>
             <div id="sharing-helper-text" class="helper-text" style="display: none; margin-top: 10px; color: #666; font-style: italic;">
-                (With more than 8 adult guests, 2 dishes can be selected for sharing.)
+                <span data-i18n="sharingHelper">(With more than 8 adult guests, 2 dishes can be selected for sharing.)</span>
             </div>
             <div class="selection-count" id="mains-count"></div>
             <span class="error-message" id="mains-quantity-error"></span>            
@@ -139,16 +156,16 @@
         </div>
 
         <div class="course-section">
-            <h2 class="course-title">Desserts</h2>
-            <p class="course-description">You can select up to 2 dessert items for your guests to choose from...</p>
+            <h2 class="course-title" data-i18n="desserts">Desserts</h2>
+            <p class="course-description" data-i18n="dessertsDescription">You can select up to 2 dessert items for your guests to choose from...</p>
             <div class="selection-count" id="desserts-count"></div>
             <span class="error-message" id="desserts-quantity-error"></span>
             <div class="menu-items" id="desserts"></div>
         </div>
 
         <div class="course-section">
-            <h2 class="course-title">Add-ons (Optional)</h2>
-            <p class="course-description">Need more food to go with your main course? You can order any of these additional dishes to make your meal even more complete... 😉 </p>
+            <h2 class="course-title" data-i18n="addons">Add-ons (Optional)</h2>
+            <p class="course-description" data-i18n="addonsDescription">Need more food to go with your main course? You can order any of these additional dishes to make your meal even more complete... 😉 </p>
             <div class="selection-count" id="addons-count"></div>
             <span class="error-message" id="addons-quantity-error"></span>
             <div class="menu-items" id="addons"></div>
@@ -156,45 +173,45 @@
 
         <!-- Add Specifics section -->
         <div class="course-section">
-            <h2 class="course-title">Additional Information</h2>
+            <h2 class="course-title" data-i18n="additionalInformation">Additional Information</h2>
             <div class="form-group">
-                <label for="allergies">Is there any food allergies or restrictions we should be aware of?</label>
+                <label for="allergies" data-i18n="allergies">Is there any food allergies or restrictions we should be aware of?</label>
                 <textarea id="allergies" name="allergies" rows="3"></textarea>
             </div>
             <div class="form-group">
-                <label for="occasion">If this is for any special occassion (e.g. birthday celebration 🎂), you can let us know:</label>
+                <label for="occasion" data-i18n="occasion">If this is for any special occasion (e.g. birthday celebration 🎂), you can let us know:</label>
                 <textarea id="occasion" name="occasion" rows="3"></textarea>
             </div>
             <div class="form-group">
-                <label>Special requests (click any that applies):</label>
+                <label data-i18n="specialRequests">Special requests (click any that applies):</label>
                 <div class="checkbox-group">
                     <label class="checkbox-label">
                         <input type="checkbox" name="special-requests" value="bigger-portion">
-                        <span>Bigger portion please</span>
+                        <span data-i18n="biggerPortion">Bigger portion please</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" name="special-requests" value="lactose-intolerant">
-                        <span>Some guest(s) is vegetarian</span>
+                        <span data-i18n="vegetarian">Some guest(s) is vegetarian</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" name="special-requests" value="vegetarian">
-                        <span>Some guest(s) cannot take diaries such as cheese or cream</span>
+                        <span data-i18n="dairyFree">Some guest(s) cannot take dairy such as cheese or cream</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" name="special-requests" value="high-chair">
-                        <span>Need high chair</span>
+                        <span data-i18n="highChair">Need high chair</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" name="special-requests" value="wheelchair-access">
-                        <span>Need wheelchair access</span>
+                        <span data-i18n="wheelchairAccess">Need wheelchair access</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" name="special-requests" value="has-pet">
-                        <span>Has pet</span>
+                        <span data-i18n="hasPet">Has pet</span>
                     </label>
                     <label class="checkbox-label">
                         <input type="checkbox" name="special-requests" value="others">
-                        <span>Others:</span>
+                        <span data-i18n="others">Others:</span>
                         <input type="text" name="special-requests-others" style="margin-left: 10px;">
                     </label>
                 </div>
@@ -204,23 +221,23 @@
             <h2 id="summary-heading">You have selected the <span id="course-count-display">0</span> course menu (<span id="menu-price-display">$0</span>) with the following dishes:</h2>
             <div id="selected-items"></div>
             <div id="completion-status" class="completion-status-container">
-                <span class="status-item" id="status-basic-info"><span class="status-dot"></span>Reservation Details</span>
-                <span class="status-item" id="status-soups"><span class="status-dot"></span>Soups</span>
-                <span class="status-item" id="status-starters"><span class="status-dot"></span>Starters</span>
-                <span class="status-item" id="status-mains"><span class="status-dot"></span>Main Courses</span>
-                <span class="status-item" id="status-desserts"><span class="status-dot"></span>Desserts</span>
+                <span class="status-item" id="status-basic-info"><span class="status-dot"></span><span data-i18n="reservationDetails">Reservation Details</span></span>
+                <span class="status-item" id="status-soups"><span class="status-dot"></span><span data-i18n="soups">Soups</span></span>
+                <span class="status-item" id="status-starters"><span class="status-dot"></span><span data-i18n="starters">Starters</span></span>
+                <span class="status-item" id="status-mains"><span class="status-dot"></span><span data-i18n="mains">Main Courses</span></span>
+                <span class="status-item" id="status-desserts"><span class="status-dot"></span><span data-i18n="desserts">Desserts</span></span>
             </div>
             <div class="button-group">
-                <button id="send-email" class="send-email-btn">Send Menu Selection</button>
-                <button id="send-whatsapp" class="whatsapp-btn">Submit (via WhatsApp)</button>
+                <button id="send-email" class="send-email-btn" data-i18n="sendMenu">Send Menu Selection</button>
+                <button id="send-whatsapp" class="whatsapp-btn" data-i18n="submitWhatsApp">Submit (via WhatsApp)</button>
             </div>
-            <p class="submission-note">(Changes can still be made with the chef as needed after this submission 😉)</p>
+            <p class="submission-note" data-i18n="submissionNote">(Changes can still be made with the chef as needed after this submission 😉)</p>
         </div>
     </div>
 
     <div class="container">
         <div id="useful-info-image" style="text-align: center; margin-bottom: 10px; display: inline;">
-            <img src="images/Gratine menu - Useful Info Jun2025.png" alt="Useful Information" style="max-width: 100%; height: auto; margin-top: 15px;">
+            <img id="useful-info-image-content" src="images/Gratine menu - Useful Info Jun2025.png" alt="Useful Information" style="max-width: 100%; height: auto; margin-top: 15px;">
         </div>
     </div>
 

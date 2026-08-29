@@ -41,6 +41,13 @@ an origin-story video. The value can be a YouTube Shorts URL, a standard
 YouTube watch URL, a short `youtu.be` URL, or an 11-character YouTube video ID.
 Rows without a value do not display the video button.
 
+## Languages
+
+Use the language selector in the app to switch between English and Traditional
+Chinese-HK. The Chinese menu fields are read from `NameZh`, `DescriptionZh`,
+`AdditionalRemarksZh`, and `WinePairingRationaleZh`. If a Chinese value is
+blank, that individual field falls back to its English counterpart.
+
 ## GitHub Pages Deployment
 
 The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` generates
