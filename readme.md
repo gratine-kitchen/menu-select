@@ -32,7 +32,20 @@ Then open:
 - `index.html` - page markup
 - `style.css` - styling
 - `script.js` - interaction logic
+- `test/` - unit tests
 - `images/` - image assets
+
+## Run Tests
+
+Tests use Node's built-in test runner. Install dependencies once, then run:
+
+```bash
+npm install
+npm test
+```
+
+- `test/core.test.js` - unit tests for pure helper functions (no DOM required).
+- `test/submit.test.js` - integration tests that fill the booking form and exercise the email and WhatsApp submission logic using jsdom.
 
 ## Menu History Videos
 
