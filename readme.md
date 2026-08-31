@@ -32,7 +32,20 @@ Then open:
 - `index.html` - page markup
 - `style.css` - styling
 - `script.js` - interaction logic
+- `test/` - unit tests
 - `images/` - image assets
+
+## Run Tests
+
+Tests use Node's built-in test runner. Install dependencies once, then run:
+
+```bash
+npm install
+npm test
+```
+
+- `test/core.test.js` - unit tests for pure helper functions (no DOM required).
+- `test/submit.test.js` - integration tests that fill the booking form and exercise the email and WhatsApp submission logic using jsdom.
 
 ## Menu History Videos
 
@@ -40,6 +53,13 @@ Add a `HistoryVideoURL` column to the published Google Sheet for any dish with
 an origin-story video. The value can be a YouTube Shorts URL, a standard
 YouTube watch URL, a short `youtu.be` URL, or an 11-character YouTube video ID.
 Rows without a value do not display the video button.
+
+## Languages
+
+Use the language selector in the app to switch between English and Traditional
+Chinese-HK. The Chinese menu fields are read from `NameZh`, `DescriptionZh`,
+`AdditionalRemarksZh`, and `WinePairingRationaleZh`. If a Chinese value is
+blank, that individual field falls back to its English counterpart.
 
 ## GitHub Pages Deployment
 
