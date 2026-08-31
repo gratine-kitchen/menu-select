@@ -42,6 +42,8 @@ body {
 .language-toggle-icon {
     width: 22px;
     height: 22px;
+    max-width: 22px;
+    flex-shrink: 0;
     object-fit: contain;
 }
 
