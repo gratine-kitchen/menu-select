@@ -221,6 +221,14 @@ function applyLanguage(language) {
         usefulInfoImage.alt = currentLanguage === 'zh-HK' ? '實用資料' : 'Useful Information';
     }
 
+    const menuOptionsImage = document.getElementById('menu-options-image-content');
+    if (menuOptionsImage) {
+        menuOptionsImage.src = currentLanguage === 'zh-HK'
+            ? 'images/Gratine menu - Options Jun2025 (Zh).png'
+            : 'images/Gratine menu - Options Jun2025.png';
+        menuOptionsImage.alt = currentLanguage === 'zh-HK' ? '菜單選項' : 'Menu Options';
+    }
+
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.dataset.i18n;
         element.textContent = t(key);
