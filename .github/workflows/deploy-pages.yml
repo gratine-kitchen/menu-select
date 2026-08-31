@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *'
 
 permissions:
   contents: read
@@ -30,6 +32,8 @@ jobs:
       - name: Generate release version
         run: |
           mkdir site
+          # Publish a same-origin fallback copy of the menu sheet.
+          curl -sSL --retry 3 --retry-delay 2 --max-time 60 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQp_lmQ3G1BBHVC5Lotsbtid6IO9kA83VGmKeI2e_Q31_LXtsFM8v2ZyvloRxo7FMixbu46ofyPq9JF/pub?gid=0&single=true&output=csv' -o site/menu.csv || echo "Warning: menu.csv could not be fetched"
           rsync -a --exclude='.git' --exclude='.github' --exclude='.vscode' --exclude='site' ./ site/
           release_date=$(date -u +%Y.%m.%d)
           release_version="${release_date}-${GITHUB_SHA:0:7}"

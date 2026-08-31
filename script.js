@@ -373,15 +373,6 @@ async function fetchMenuData() {
     const urlWithCacheBust = `${PUBLISHED_CSV_URL}&_=${timestamp}`;
     console.log('Fetching menu data...');
 
-    // List of endpoints to try, including a direct attempt.
-    const endpoints = [
-        'https://corsproxy.io/?' + encodeURIComponent(urlWithCacheBust),
-        'https://api.allorigins.win/raw?url=' + encodeURIComponent(urlWithCacheBust),
-        'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(urlWithCacheBust),
-        'https://thingproxy.freeboard.io/fetch/' + urlWithCacheBust,
-        urlWithCacheBust // Direct attempt
-    ];
-
     // Helper to fetch with a timeout to prevent hanging requests.
     const fetchWithTimeout = async (url, timeout = 8000) => {
         const controller = new AbortController();
@@ -395,51 +386,47 @@ async function fetchMenuData() {
             }
             const text = await response.text();
             if (!text || text.trim() === '') {
-                throw new Error(`Empty response`);
+                throw new Error('Empty response');
             }
             console.log(`Successfully fetched from: ${url.substring(0, 40)}...`);
             return text;
         } catch (error) {
             clearTimeout(id);
-            // Log the specific error and re-throw to allow Promise.any to catch it as a failure.
             console.log(`Fetch attempt failed for ${url.substring(0, 40)}...: ${error.message}`);
             throw new Error(`Failed to fetch from ${url}`);
         }
     };
 
+    const liveEndpoints = [
+        'https://api.allorigins.win/raw?url=' + encodeURIComponent(urlWithCacheBust),
+        'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(urlWithCacheBust),
+        'https://corsproxy.io/?url=' + encodeURIComponent(urlWithCacheBust),
+        'https://api.cors.lol/?url=' + encodeURIComponent(urlWithCacheBust),
+        urlWithCacheBust // Direct attempt
+    ];
+
+    let csvText = null;
+
+    // 1. Prefer the live Google Sheet so the latest data shows when available.
+    const liveAttempt = Promise.any(liveEndpoints.map(url => fetchWithTimeout(url)));
+    const liveDeadline = new Promise((_, reject) => setTimeout(() => reject(new Error('Live menu fetch deadline reached')), 5000));
     try {
-        // Race all fetch attempts. The first one to succeed wins.
-        const fetchPromises = endpoints.map(url => fetchWithTimeout(url));
-        const csvText = await Promise.any(fetchPromises);
-
-        // PapaParse the successful response.
-        return new Promise((resolve, reject) => {
-            Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                // Add transformHeader to trim whitespace from header keys.
-                // This prevents issues where a header like " WinePairing " doesn't match the expected "WinePairing" key.
-                transformHeader: header => {
-                    return header.trim();
-                },
-                complete: (results) => {
-                    if (results.data && results.data.length > 0) {
-                        console.log('Raw CSV data (first 3 rows):', results.data.slice(0, 3));
-                        resolve(processCSVData(results.data));
-                    } else {
-                        reject(new Error('No data found in CSV after parsing.'));
-                    }
-                },
-                error: (error) => {
-                    console.error('PapaParse error:', error);
-                    reject(new Error('Error parsing CSV data: ' + error.message));
-                }
-            });
-        });
-
+        csvText = await Promise.race([liveAttempt, liveDeadline]);
     } catch (error) {
-        // This block catches if all promises in Promise.any fail, or if PapaParse rejects.
-        console.error('All menu data fetch attempts failed. This is expected if all proxies and the direct link are down.', error);
+        console.warn('Live menu data fetch failed; falling back to cached menu.csv.', error);
+    }
+
+    // 2. Fall back to the same-origin snapshot published at deploy time.
+    if (!csvText) {
+        try {
+            csvText = await fetchWithTimeout(`menu.csv?cache=${timestamp}`);
+        } catch (error) {
+            console.warn('Cached menu.csv fallback also failed.', error);
+        }
+    }
+
+    if (!csvText) {
+        console.error('All menu data fetch attempts failed. This is expected if all proxies and the direct link are down.');
         const container = document.querySelector('.container');
         if (container) {
             const errorDiv = document.createElement('div');
@@ -450,6 +437,31 @@ async function fetchMenuData() {
         }
         return null; // Return null to signal failure to the caller
     }
+
+    // PapaParse the successful response.
+    return new Promise((resolve, reject) => {
+        Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            // Add transformHeader to trim whitespace from header keys.
+            // This prevents issues where a header like " WinePairing " doesn't match the expected "WinePairing" key.
+            transformHeader: header => {
+                return header.trim();
+            },
+            complete: (results) => {
+                if (results.data && results.data.length > 0) {
+                    console.log('Raw CSV data (first 3 rows):', results.data.slice(0, 3));
+                    resolve(processCSVData(results.data));
+                } else {
+                    reject(new Error('No data found in CSV after parsing.'));
+                }
+            },
+            error: (error) => {
+                console.error('PapaParse error:', error);
+                reject(new Error('Error parsing CSV data: ' + error.message));
+            }
+        });
+    });
 }
 
 function processCSVData(csvData) {
