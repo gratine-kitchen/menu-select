@@ -19,6 +19,9 @@ const translations = {
         bookingDate: 'Booking date:',
         arrivalTime: 'Arrival time:',
         arrivalTimePlaceholder: 'e.g. Around 7pm',
+        arrivalTimeReminderPrefix: 'We just need to know your ',
+        arrivalTimeReminderLink: 'arrival time',
+        arrivalTimeReminderSuffix: ' as well regarding your Reservation Details.',
         adults: 'Number of Adults 👩🏻:',
         children: 'Number of Children 🧒🏻: (age 5 to 12)',
         toddlers: 'Number of Toddlers 👶🏻: (age 4 or below)',
@@ -101,6 +104,9 @@ const translations = {
         bookingDate: '預約日期：',
         arrivalTime: '抵達時間：',
         arrivalTimePlaceholder: '例如：晚上約七時',
+        arrivalTimeReminderPrefix: '關於您的預約資料，我們還需要知道您的',
+        arrivalTimeReminderLink: '抵達時間',
+        arrivalTimeReminderSuffix: '。',
         adults: '成人數目 👩🏻：',
         children: '小童數目 🧒🏻：（5 至 12 歲）',
         toddlers: '幼童數目 👶🏻：（4 歲或以下）',
@@ -1419,6 +1425,13 @@ function updateButtonStates() {
     const isFormValid = name && contactNumber && bookingDate && arrivalTime && adultCountVal && courseCountVal && !adultKidError && !dateError;
     document.querySelector('#status-basic-info .status-dot')?.classList.toggle('completed', isFormValid);
 
+    // Nudge the user when everything else is filled but the arrival time is missing.
+    const arrivalTimeReminder = document.getElementById('arrival-time-reminder');
+    if (arrivalTimeReminder) {
+        const missingOnlyArrivalTime = name && contactNumber && bookingDate && !arrivalTime && adultCountVal && courseCountVal;
+        arrivalTimeReminder.hidden = !missingOnlyArrivalTime;
+    }
+
     // --- Selections & Quantities Check ---
     let areAllSelectionsValid = true;
     const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
@@ -1508,6 +1521,19 @@ function setupFormValidationAndInteractions() {
         toggleOthersText(); // Initial state
     }
     
+    // Clicking the reminder focuses the arrival-time input.
+    const arrivalTimeReminderLink = document.getElementById('arrival-time-reminder-link');
+    if (arrivalTimeReminderLink) {
+        arrivalTimeReminderLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            const arrivalTimeInput = document.getElementById('arrival-time');
+            if (arrivalTimeInput) {
+                arrivalTimeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                arrivalTimeInput.focus();
+            }
+        });
+    }
+
     // Initial call to set button states
     updateButtonStates();
 }
