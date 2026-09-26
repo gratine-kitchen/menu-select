@@ -39,6 +39,7 @@ const translations = {
         sharingHelper: '(With more than 8 adult guests, 2 dishes can be selected for sharing.)',
         desserts: 'Desserts',
         dessertsDescription: 'You can select up to 2 dessert items for your guests to choose from...',
+        dessertsDescription3: 'You can select up to 3 dessert items for your guests to choose from...',
         addons: 'Add-ons (Optional)',
         addonsDescription: 'Need more food to go with your main course? You can order any of these additional dishes to make your meal even more complete... 😉',
         additionalInformation: 'Additional Information',
@@ -124,6 +125,7 @@ const translations = {
         sharingHelper: '（成人超過 8 位時，可選擇兩款分享主菜。）',
         desserts: '甜品',
         dessertsDescription: '請選擇最多兩款甜品供客人選擇⋯⋯',
+        dessertsDescription3: '請選擇最多三款甜品供客人選擇⋯⋯',
         addons: '追加菜式（可選）',
         addonsDescription: '想為主菜加添更多美食？可選擇以下追加菜式，令用餐體驗更豐富⋯⋯ 😉',
         additionalInformation: '其他資料',
@@ -243,6 +245,14 @@ function applyLanguage(language) {
         element.alt = t(element.dataset.i18nAlt);
     });
 
+    // Keep the desserts description in sync with any code-modified max selections.
+    const dessertsDescriptionEl = document.querySelector('[data-i18n="dessertsDescription"]');
+    if (dessertsDescriptionEl) {
+        dessertsDescriptionEl.textContent = courseConfig.desserts.maxSelections === 3
+            ? t('dessertsDescription3')
+            : t('dessertsDescription');
+    }
+
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) languageSelect.value = currentLanguage;
     const languageLabel = document.getElementById('current-language-label');
@@ -354,6 +364,35 @@ const selectedItems = Object.keys(courseConfig).reduce((acc, category) => {
     acc[category] = courseConfig[category].allowMultiple ? [] : null;
     return acc;
 }, {});
+
+// Query-string "code" modifiers. The `code` parameter may be supplied multiple
+// times (?code=3D&code=...), and each registered code adjusts validation rules.
+const codeModifiers = {
+    // "3D" allows up to 3 dessert selections instead of the default 2.
+    '3D': {
+        apply() {
+            courseConfig.desserts.maxSelections = 3;
+        }
+    }
+};
+
+function getActiveCodes() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return new Set(
+        urlParams.getAll('code')
+            .map(code => String(code).trim().toUpperCase())
+            .filter(Boolean)
+    );
+}
+
+function applyCodeModifiers() {
+    getActiveCodes().forEach(code => {
+        const modifier = codeModifiers[code];
+        if (modifier && typeof modifier.apply === 'function') {
+            modifier.apply();
+        }
+    });
+}
 
 // Menu prices configuration
 const menuPrices = {
@@ -1745,6 +1784,7 @@ function sendWhatsApp() {
 // --- DOMContentLoaded ---
 window.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded, initializing menu builder...');
+    applyCodeModifiers(); // Apply ?code=... validation overrides before rendering.
     applyLanguage(currentLanguage);
     setupLanguageControls();
 
