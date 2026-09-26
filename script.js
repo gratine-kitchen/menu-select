@@ -335,6 +335,7 @@ const courseConfig = {
     },
     starters: {
         maxSelections: 2, // This will be updated by courseCountChange
+        bonusSelections: 0, // Extra starters granted by ?code=SD.
         allowMultiple: true,
         displayName: 'Starters', // e.g. "Our starters are mainly designed to be shared and everyone will be served the same."
         required: true,
@@ -351,6 +352,7 @@ const courseConfig = {
     desserts: {
         maxSelections: 2,
         allowMultiple: true,
+        readonly: false, // Set true by ?code=SD to grey out desserts.
         displayName: 'Desserts', // e.g. "You can select up to 2 dessert items for your guests to choose from..."
         required: true,
         summaryCaption: '[Choose one per guest]'
@@ -398,6 +400,14 @@ const codeModifiers = {
             courseConfig.mains.maxSelectionsCap = 3;
             courseConfig.desserts.maxSelections = 3;
         }
+    },
+    // "SD" (Skip Desserts) makes desserts optional and grants +1 starter.
+    'SD': {
+        apply() {
+            courseConfig.desserts.required = false;
+            courseConfig.desserts.readonly = true; // Grey out the desserts section.
+            courseConfig.starters.bonusSelections = 1;
+        }
     }
 };
 
@@ -415,6 +425,14 @@ function applyCodeModifiers() {
         const modifier = codeModifiers[code];
         if (modifier && typeof modifier.apply === 'function') {
             modifier.apply();
+        }
+    });
+
+    // Grey out any section made readonly by a code (e.g. desserts with ?code=SD).
+    Object.entries(courseConfig).forEach(([category, config]) => {
+        if (config.readonly) {
+            const section = document.getElementById(category)?.closest('.course-section');
+            if (section) section.classList.add('section-readonly');
         }
     });
 }
@@ -611,6 +629,10 @@ function processCSVData(csvData) {
     return menuData;
 }
 
+function isCategoryReadonly(category) {
+    return isReadonly || courseConfig[category]?.readonly === true;
+}
+
 function createMenuItem(item, category) {
     const div = document.createElement('div');
     div.className = 'menu-item';
@@ -624,7 +646,8 @@ function createMenuItem(item, category) {
     const winePairingRationale = getLocalizedItemValue(item, 'winePairingRationale', 'winePairingRationaleZh');
 
     let quantityDropdownHTML = '';
-    if (!isReadonly && category === 'addons') {
+    const categoryReadonly = isCategoryReadonly(category);
+    if (!categoryReadonly && category === 'addons') {
         let optionsHTML = `<option value="" disabled selected>${t('addonQuantityPlaceholder')}</option>`;
         for (let i = 1; i <= 5; i++) {
             optionsHTML += `<option value="${i}">${i}</option>`;
@@ -634,7 +657,7 @@ function createMenuItem(item, category) {
                 ${optionsHTML}
             </select>
         `;
-    } else if (!isReadonly && category !== 'starters' && category !== 'addons' && currentServingStyle !== 'sharing') {
+    } else if (!categoryReadonly && category !== 'starters' && category !== 'addons' && currentServingStyle !== 'sharing') {
          quantityDropdownHTML = `
             <select class="quantity-select" data-item-id="${item.id}" style="display: ${isChecked ? 'block' : 'none'}; position: absolute; bottom: 15px; left: 15px; width: calc(100% - 30px); max-width: 190px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.7em; z-index: 2;">
                 <option value="" disabled selected>${t('quantityPlaceholder')}</option>
@@ -655,7 +678,7 @@ function createMenuItem(item, category) {
 
     // Prepare wine pairing info for the card
     let winePairingCardHTML = '';
-    if (item.winePairing && !isReadonly) {
+    if (item.winePairing && !categoryReadonly) {
         const hasRationale = winePairingRationale && winePairingRationale.trim() !== '';
         const containerClass = hasRationale ? 'wine-pairing-container' : 'wine-pairing-container disabled';
         const tooltipAttr = hasRationale ? `data-tooltip="${winePairingRationale}"` : '';
@@ -671,7 +694,7 @@ function createMenuItem(item, category) {
     }
 
     div.innerHTML = `
-        <input type="checkbox" id="item-${item.id}" ${isChecked ? 'checked' : ''} style="z-index: 3;" ${isReadonly ? 'disabled' : ''}>
+        <input type="checkbox" id="item-${item.id}" ${isChecked ? 'checked' : ''} style="z-index: 3;" ${categoryReadonly ? 'disabled' : ''}>
         <img src="${item.image}" alt="${itemName}" onerror="this.src='https://placehold.co/250x250/eeeeee/cccccc?text=No+Image'" class="menu-image">
         <h3>${itemName}${item.isSignature ? ' ⭐' : ''}</h3>
         <p>${itemDescription}${upgradePriceText ? `<br><b class="price-upgrade">${upgradePriceText}</b>` : ''}</p>
@@ -723,7 +746,7 @@ function createMenuItem(item, category) {
         checkbox.style.display = 'none';
     } else {
     checkbox.addEventListener('change', () => {
-            if (isReadonly) return;
+            if (categoryReadonly) return;
             if (!div.classList.contains('disabled')) {
                 selectItem(item, category, div);
             }
@@ -739,7 +762,7 @@ function createMenuItem(item, category) {
     }
 
     div.addEventListener('click', (event) => {
-        if (isReadonly) return;
+        if (categoryReadonly) return;
         if (event.target.matches('input[type="checkbox"]') || event.target.matches('select.quantity-select') || event.target.matches('select.quantity-select option') || event.target.closest('.history-video-button')) {
             return; // Let the specific handlers work
         }
@@ -748,7 +771,12 @@ function createMenuItem(item, category) {
             checkbox.dispatchEvent(new Event('change'));
         }
     });
-    
+
+    // Grey out items in a section made readonly by a code (e.g. desserts with ?code=SD).
+    if (courseConfig[category]?.readonly === true && !isReadonly) {
+        div.classList.add('disabled');
+    }
+
     return div;
 }
 
@@ -902,8 +930,15 @@ function updateSelectionCount(category) {
         }
     }
     const menuItemsInCategory = document.querySelectorAll(`#${category} .menu-item`);
+    const codeReadonly = config.readonly === true;
     menuItemsInCategory.forEach(itemDiv => {
         const checkbox = itemDiv.querySelector('input[type="checkbox"]');
+        if (codeReadonly) {
+            // Sections made readonly by a code stay greyed out and unselectable.
+            itemDiv.classList.add('disabled');
+            if (checkbox) checkbox.disabled = true;
+            return;
+        }
         if (!itemDiv.classList.contains('selected')) {
             const isDisabled = selectedCount >= maxCount;
             itemDiv.classList.toggle('disabled', isDisabled);
@@ -1449,7 +1484,8 @@ function handleCourseCountChange(event) {
         if (menuPriceDisplayEl) menuPriceDisplayEl.textContent = `$${currentMenuPrice}`;
         
         // Update max selections for starters based on the selected course count
-        courseConfig.starters.maxSelections = courseCountAvailability[totalCourses].starterCount || 2; // Fallback
+        const starterBonus = courseConfig.starters.bonusSelections || 0;
+        courseConfig.starters.maxSelections = (courseCountAvailability[totalCourses].starterCount || 2) + starterBonus;
         
         // Reset selections for starters if they exceed the new max
         if (selectedItems.starters.length > courseConfig.starters.maxSelections) {
@@ -1510,51 +1546,57 @@ function updateButtonStates() {
     const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
 
     for (const category in courseConfig) {
-        if (courseConfig[category].required) {
-            const statusElement = document.querySelector(`#status-${category} .status-dot`);
-            if (!statusElement) continue;
+        const statusElement = document.querySelector(`#status-${category} .status-dot`);
+        if (!statusElement) continue;
 
-            const selected = selectedItems[category];
-            const minSelections = 1;
-            const maxSelections = courseConfig[category].maxSelections;
-            
-            // 1. Check selection count
-            let isSelectionCountValid = false;
-            if (courseConfig[category].allowMultiple) {
-                if (category === 'starters') {
-                    if (selected && selected.length === maxSelections) {
-                        isSelectionCountValid = true;
-                    }
-                } else {
-                    if (selected && selected.length >= minSelections && selected.length <= maxSelections) {
-                        isSelectionCountValid = true;
-                    }
+        const config = courseConfig[category];
+
+        // Optional categories (e.g. desserts with ?code=SD) are always satisfied.
+        if (!config.required) {
+            statusElement.classList.add('completed');
+            continue;
+        }
+
+        const selected = selectedItems[category];
+        const minSelections = 1;
+        const maxSelections = config.maxSelections;
+
+        // 1. Check selection count
+        let isSelectionCountValid = false;
+        if (config.allowMultiple) {
+            if (category === 'starters') {
+                if (selected && selected.length === maxSelections) {
+                    isSelectionCountValid = true;
                 }
             } else {
-                if (selected) {
+                if (selected && selected.length >= minSelections && selected.length <= maxSelections) {
                     isSelectionCountValid = true;
                 }
             }
-
-            // 2. Check quantity for this category
-            let isQuantityValid = true;
-            const isQuantityValidationApplicable = category !== 'starters' && category !== 'addons' && (category !== 'mains' || currentServingStyle === 'individual');
-            if (isSelectionCountValid && isQuantityValidationApplicable && adultCount > 0) {
-                let totalQuantity = 0;
-                (Array.isArray(selected) ? selected : [selected]).forEach(item => {
-                    totalQuantity += getItemQuantity(item.id);
-                });
-                if (totalQuantity > adultCount) {
-                    isQuantityValid = false;
-                }
+        } else {
+            if (selected) {
+                isSelectionCountValid = true;
             }
-            
-            const isCategoryOverallValid = isSelectionCountValid && isQuantityValid;
-            statusElement.classList.toggle('completed', isCategoryOverallValid);
+        }
 
-            if (!isCategoryOverallValid) {
-                areAllSelectionsValid = false;
+        // 2. Check quantity for this category
+        let isQuantityValid = true;
+        const isQuantityValidationApplicable = category !== 'starters' && category !== 'addons' && (category !== 'mains' || currentServingStyle === 'individual');
+        if (isSelectionCountValid && isQuantityValidationApplicable && adultCount > 0) {
+            let totalQuantity = 0;
+            (Array.isArray(selected) ? selected : [selected]).forEach(item => {
+                totalQuantity += getItemQuantity(item.id);
+            });
+            if (totalQuantity > adultCount) {
+                isQuantityValid = false;
             }
+        }
+
+        const isCategoryOverallValid = isSelectionCountValid && isQuantityValid;
+        statusElement.classList.toggle('completed', isCategoryOverallValid);
+
+        if (!isCategoryOverallValid) {
+            areAllSelectionsValid = false;
         }
     }
     

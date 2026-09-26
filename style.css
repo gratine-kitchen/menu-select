@@ -177,6 +177,16 @@ h1 {
     cursor: not-allowed;
 }
 
+.course-section.section-readonly {
+    opacity: 0.95;
+    filter: grayscale(10%);
+}
+
+.course-section.section-readonly .menu-item,
+.course-section.section-readonly .menu-item input[type="checkbox"] {
+    cursor: not-allowed;
+}
+
 /* Ribbon styles */
 .ribbon {
     position: absolute;
