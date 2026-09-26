@@ -38,8 +38,7 @@ const translations = {
         sharing: 'Family-Style Sharing',
         sharingHelper: '(With more than 8 adult guests, 2 dishes can be selected for sharing.)',
         desserts: 'Desserts',
-        dessertsDescription: 'You can select up to 2 dessert items for your guests to choose from...',
-        dessertsDescription3: 'You can select up to 3 dessert items for your guests to choose from...',
+        dessertsDescription: max => `You can select up to ${max} dessert items for your guests to choose from...`,
         addons: 'Add-ons (Optional)',
         addonsDescription: 'Need more food to go with your main course? You can order any of these additional dishes to make your meal even more complete... 😉',
         additionalInformation: 'Additional Information',
@@ -124,8 +123,7 @@ const translations = {
         sharing: '家庭式分享',
         sharingHelper: '（成人超過 8 位時，可選擇兩款分享主菜。）',
         desserts: '甜品',
-        dessertsDescription: '請選擇最多兩款甜品供客人選擇⋯⋯',
-        dessertsDescription3: '請選擇最多三款甜品供客人選擇⋯⋯',
+        dessertsDescription: max => `請選擇最多 ${max} 款甜品供客人選擇⋯⋯`,
         addons: '追加菜式（可選）',
         addonsDescription: '想為主菜加添更多美食？可選擇以下追加菜式，令用餐體驗更豐富⋯⋯ 😉',
         additionalInformation: '其他資料',
@@ -233,6 +231,8 @@ function applyLanguage(language) {
 
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.dataset.i18n;
+        const rawValue = translations[currentLanguage]?.[key] ?? translations.en[key];
+        if (typeof rawValue === 'function') return; // Dynamic strings are applied separately.
         element.textContent = t(key);
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
@@ -248,9 +248,7 @@ function applyLanguage(language) {
     // Keep the desserts description in sync with any code-modified max selections.
     const dessertsDescriptionEl = document.querySelector('[data-i18n="dessertsDescription"]');
     if (dessertsDescriptionEl) {
-        dessertsDescriptionEl.textContent = courseConfig.desserts.maxSelections === 3
-            ? t('dessertsDescription3')
-            : t('dessertsDescription');
+        dessertsDescriptionEl.textContent = t('dessertsDescription', courseConfig.desserts.maxSelections);
     }
 
     const languageSelect = document.getElementById('language-select');
