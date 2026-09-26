@@ -29,7 +29,7 @@ const translations = {
         menuCourses: 'Please choose the number of menu courses:',
         priceNote: 'Price includes tea/coffee, free corkage & cake-cutting. Subject to 10% service fee.',
         soups: 'Soups',
-        soupsDescription: 'Please select up to 2 soup items for your guests to choose from...',
+        soupsDescription: max => `Please select up to ${max} soup items for your guests to choose from...`,
         starters: 'Starters',
         startersDescription: 'Our starters are mainly designed to be shared and everyone will be served the same. We have quite a large variety of starters... you can savor more of them by choosing a menu with more courses. :-)',
         mains: 'Main Courses',
@@ -114,7 +114,7 @@ const translations = {
         menuCourses: '請選擇套餐菜式數目：',
         priceNote: '價格包括茶／咖啡、免開瓶費及切餅費，另加 10% 服務費。',
         soups: '湯品',
-        soupsDescription: '請選擇最多兩款湯品供客人選擇⋯⋯',
+        soupsDescription: max => `請選擇最多 ${max} 款湯品供客人選擇⋯⋯`,
         starters: '前菜',
         startersDescription: '前菜主要供客人分享，所有客人將享用相同菜式。我們提供多款前菜，選擇更多菜式的套餐即可品嚐更多款式。:-)',
         mains: '主菜',
@@ -245,11 +245,17 @@ function applyLanguage(language) {
         element.alt = t(element.dataset.i18nAlt);
     });
 
-    // Keep the desserts description in sync with any code-modified max selections.
-    const dessertsDescriptionEl = document.querySelector('[data-i18n="dessertsDescription"]');
-    if (dessertsDescriptionEl) {
-        dessertsDescriptionEl.textContent = t('dessertsDescription', courseConfig.desserts.maxSelections);
-    }
+    // Dynamic descriptions (functions of maxSelections) are applied explicitly.
+    const dynamicDescriptions = {
+        soups: 'soupsDescription',
+        desserts: 'dessertsDescription'
+    };
+    Object.entries(dynamicDescriptions).forEach(([category, key]) => {
+        const descriptionEl = document.querySelector(`[data-i18n="${key}"]`);
+        if (descriptionEl) {
+            descriptionEl.textContent = t(key, courseConfig[category].maxSelections);
+        }
+    });
 
     const languageSelect = document.getElementById('language-select');
     if (languageSelect) languageSelect.value = currentLanguage;
@@ -336,6 +342,7 @@ const courseConfig = {
     },
     mains: {
         maxSelections: 2, // Can be 1 or 2 for sharing
+        maxSelectionsCap: 2, // Upper bound that ?code=3M/3E can raise.
         allowMultiple: true,
         displayName: 'Main Courses', // e.g. "For the main course, you have the option of individual plating or family-style."
         required: true,
@@ -369,6 +376,26 @@ const codeModifiers = {
     // "3D" allows up to 3 dessert selections instead of the default 2.
     '3D': {
         apply() {
+            courseConfig.desserts.maxSelections = 3;
+        }
+    },
+    // "3S" allows up to 3 soup selections.
+    '3S': {
+        apply() {
+            courseConfig.soups.maxSelections = 3;
+        }
+    },
+    // "3M" allows up to 3 main-course selections.
+    '3M': {
+        apply() {
+            courseConfig.mains.maxSelectionsCap = 3;
+        }
+    },
+    // "3E" allows up to 3 soups, mains, and desserts.
+    '3E': {
+        apply() {
+            courseConfig.soups.maxSelections = 3;
+            courseConfig.mains.maxSelectionsCap = 3;
             courseConfig.desserts.maxSelections = 3;
         }
     }
@@ -1121,10 +1148,11 @@ function updateMainCourseDisplay(resetSelections = true) {
     currentServingStyle = servingStyle; // Update global tracker
 
     const adultCount = parseInt(document.getElementById('adult-count').value) || 0;
+    const mainsCap = courseConfig.mains.maxSelectionsCap || 2;
     if (servingStyle === 'sharing') {
-        courseConfig.mains.maxSelections = adultCount > 8 ? 2 : 1;
+        courseConfig.mains.maxSelections = adultCount > 8 ? mainsCap : 1;
     } else { // individual
-        courseConfig.mains.maxSelections = 2; // Default for individual
+        courseConfig.mains.maxSelections = mainsCap;
     }
     
     // Clear previous mains selections and their quantities
