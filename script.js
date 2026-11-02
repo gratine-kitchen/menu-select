@@ -600,6 +600,7 @@ function processCSVData(csvData) {
             descriptionZh: row.DescriptionZh || '',
             image: getDirectImageUrl(row['Image URL']),
             upgradePrice: parseFloat(row['Upgrade Price']) || 0,
+            discountedUpgradePrice: parseFloat(row['Discounted Upgrade Price']) || 0,
             upgradeCaption: row['Upgrade Caption'] || '',
             additionalRemarks: row.AdditionalRemarks || '',
             additionalRemarksZh: row.AdditionalRemarksZh || '',
@@ -631,6 +632,19 @@ function processCSVData(csvData) {
 
 function isCategoryReadonly(category) {
     return isReadonly || courseConfig[category]?.readonly === true;
+}
+
+function getUpgradePriceHTML(item) {
+    if (item.upgradePrice <= 0) {
+        return '';
+    }
+
+    const regularPrice = `+$${item.upgradePrice.toFixed(0)}`;
+    const discountedPrice = item.discountedUpgradePrice > 0
+        ? `<del>${regularPrice}</del> +$${item.discountedUpgradePrice.toFixed(0)}`
+        : '';
+    const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
+    return `(${discountedPrice || regularPrice}${caption})`;
 }
 
 function createMenuItem(item, category) {
@@ -665,13 +679,7 @@ function createMenuItem(item, category) {
         `;
     }
     
-    // Determine how to display the upgrade price based on the category
-    let upgradePriceText = '';
-    if (item.upgradePrice > 0) {
-        const priceString = `+$${item.upgradePrice.toFixed(0)}`;
-        const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
-        upgradePriceText = `(${priceString}${caption})`;
-    }
+    const upgradePriceText = getUpgradePriceHTML(item);
 
     // Determine ribbon style
     const ribbonStyle = item.remarksColor ? `style="background-color: ${item.remarksColor};"` : '';
@@ -1057,12 +1065,7 @@ function updateSummary() {
 
         categoryItemsForSummary.forEach(item => {
             if (item && !item.disabled) { // Ensure item is not undefined
-                let priceInfo = '';
-                if (item.upgradePrice > 0) {
-                    const priceString = `+$${item.upgradePrice.toFixed(0)}`;
-                    const caption = item.upgradeCaption ? ` ${item.upgradeCaption}` : '';
-                    priceInfo = `(${priceString}${caption})`;
-                }
+                const priceInfo = getUpgradePriceHTML(item);
                 const quantity = getItemQuantity(item.id);
                 totalQuantityInCategory += quantity;
 

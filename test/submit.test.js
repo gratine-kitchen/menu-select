@@ -130,6 +130,30 @@ test('switching language does not break submission data collection', async () =>
     assert.ok(data.menuPriceDisplay.startsWith('$'), 'menu price should be present');
 });
 
+test('menu card shows the regular upgrade price struck through before the discount price', async () => {
+    const window = await setupApp();
+    window.menuData = {
+        soups: [
+            makeItem('S1', 'Tomato Soup', { upgradePrice: 48, discountedUpgradePrice: 35 }),
+            makeItem('S2', 'No promotion', { upgradePrice: 80 })
+        ],
+        starters: [],
+        mains: { individual: [], sharing: [] },
+        desserts: [],
+        addons: []
+    };
+    window.renderLocalizedMenus();
+
+    const price = window.document.querySelector('#soups .price-upgrade');
+    assert.ok(price, 'upgrade price should be rendered');
+    assert.equal(price.querySelector('del')?.textContent, '+$48');
+    assert.equal(price.textContent, '(+$48 +$35)');
+
+    const regularPrice = window.document.querySelector('#soups [data-id="S2"] .price-upgrade');
+    assert.ok(regularPrice, 'regular upgrade price should still be rendered');
+    assert.equal(regularPrice.querySelector('del'), null);
+});
+
 test('sendEmail submits the expected template parameters', async () => {
     const window = await setupApp();
     fillForm(window);

@@ -123,7 +123,7 @@ test('getInitialLanguage resolves URL, storage, and defaults in priority order',
 test('processCSVData maps categories, skips invalid rows, and keeps localized fields', () => {
     const { core } = loadCore();
     const rows = [
-        { Category: 'Soups', ID: 'S1', Name: 'Tomato Soup', Description: 'Fresh tomatoes', IsActive: 'TRUE', ServingStyle: '', 'Image URL': '', NameZh: '番茄湯', DescriptionZh: '新鮮番茄' },
+        { Category: 'Soups', ID: 'S1', Name: 'Tomato Soup', Description: 'Fresh tomatoes', IsActive: 'TRUE', ServingStyle: '', 'Image URL': '', NameZh: '番茄湯', DescriptionZh: '新鮮番茄', 'Upgrade Price': '80', 'Discounted Upgrade Price': '100' },
         { Category: 'Mains', ID: 'M1', Name: 'Steak', IsActive: 'TRUE', ServingStyle: 'individual' },
         { Category: 'Mains', ID: 'M2', Name: 'Platter', IsActive: 'TRUE', ServingStyle: 'sharing' },
         { Category: 'Mains', ID: 'M3', Name: 'Hidden', IsActive: 'FALSE', ServingStyle: 'individual' },
@@ -135,11 +135,23 @@ test('processCSVData maps categories, skips invalid rows, and keeps localized fi
     assert.equal(data.soups.length, 1);
     assert.equal(data.soups[0].id, 'S1');
     assert.equal(data.soups[0].nameZh, '番茄湯');
+    assert.equal(data.soups[0].upgradePrice, 80);
+    assert.equal(data.soups[0].discountedUpgradePrice, 100);
 
     assert.equal(data.mains.individual.length, 1);
     assert.equal(data.mains.individual[0].id, 'M1');
     assert.equal(data.mains.sharing.length, 1);
     assert.equal(data.mains.sharing[0].id, 'M2');
+});
+
+test('processCSVData treats a blank discounted upgrade price as zero', () => {
+    const { core } = loadCore();
+    const rows = [
+        { Category: 'Soups', ID: 'S1', Name: 'Tomato Soup', IsActive: 'TRUE', 'Upgrade Price': '80', 'Discounted Upgrade Price': '' }
+    ];
+
+    const data = core.processCSVData(rows);
+    assert.equal(data.soups[0].discountedUpgradePrice, 0);
 });
 
 test('processCSVData converts Google Drive image URLs to thumbnails', () => {

@@ -61,6 +61,10 @@ Chinese-HK. The Chinese menu fields are read from `NameZh`, `DescriptionZh`,
 `AdditionalRemarksZh`, and `WinePairingRationaleZh`. If a Chinese value is
 blank, that individual field falls back to its English counterpart.
 
+For an upgrade promotion, add a `Discounted Upgrade Price` column to the
+published Google Sheet. When it has a value, the regular `Upgrade Price` is
+shown struck through before the discounted price.
+
 ## GitHub Pages Deployment
 
 The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` generates

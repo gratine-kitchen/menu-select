@@ -245,6 +245,10 @@ h1 {
     font-size: 0.85em;
 }
 
+.price-upgrade del {
+    font-weight: normal;
+}
+
 /* --- Wine Pairing Tooltip Styles --- */
 .wine-pairing-container {
     position: relative; /* Needed for tooltip positioning */
