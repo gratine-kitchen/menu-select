@@ -130,6 +130,23 @@ test('switching language does not break submission data collection', async () =>
     assert.ok(data.menuPriceDisplay.startsWith('$'), 'menu price should be present');
 });
 
+test('other special request is a multiline textarea and appears in the summary', async () => {
+    const window = await setupApp();
+    const othersRequest = window.document.querySelector('textarea[name="special-requests-others"]');
+    const othersCheckbox = window.document.querySelector('input[name="special-requests"][value="others"]');
+
+    assert.ok(othersRequest, 'other special request should use a textarea');
+    assert.equal(othersRequest.disabled, true, 'textarea should start disabled');
+
+    othersCheckbox.checked = true;
+    othersCheckbox.dispatchEvent(new window.Event('change', { bubbles: true }));
+    assert.equal(othersRequest.disabled, false, 'textarea should enable when Others is checked');
+
+    othersRequest.value = 'First line\nSecond line';
+    othersRequest.dispatchEvent(new window.Event('input', { bubbles: true }));
+    assert.ok(window.document.getElementById('selected-items').textContent.includes('First line\nSecond line'));
+});
+
 test('menu card shows the regular upgrade price struck through before the discount price', async () => {
     const window = await setupApp();
     window.menuData = {

@@ -358,6 +358,16 @@ h1 {
     font-weight: bold;
 }
 
+.form-group .checkbox-label-others {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.checkbox-label-others input[type="checkbox"] {
+    margin-top: 6px;
+}
+
 /* Add styles for required field asterisk */
 .required-field::after {
     content: " *";

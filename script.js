@@ -1110,7 +1110,7 @@ function updateSummary() {
     const specialRequestsChecked = Array.from(document.querySelectorAll('input[name="special-requests"]:checked'))
         .filter(checkbox => checkbox.value !== 'others') // Exclude 'others' checkbox itself
         .map(checkbox => checkbox.nextElementSibling.textContent.trim());
-    const othersRequestInput = document.querySelector('input[name="special-requests-others"]');
+    const othersRequestInput = document.querySelector('[name="special-requests-others"]');
     const othersRequestValue = (othersRequestInput && !othersRequestInput.disabled) ? othersRequestInput.value.trim() : '';
 
     if (allergies) html += `<p><strong>${t('allergiesSummary')}</strong> ${allergies}</p>`;
@@ -1628,9 +1628,9 @@ function setupFormValidationAndInteractions() {
         input.addEventListener('change', updateSummary);
     });
 
-    // Enable/disable "Others" text input based on checkbox
+    // Enable/disable "Others" text area based on checkbox
     const othersCheckbox = document.querySelector('input[name="special-requests"][value="others"]');
-    const othersTextInput = document.querySelector('input[name="special-requests-others"]');
+    const othersTextInput = document.querySelector('[name="special-requests-others"]');
     if (othersCheckbox && othersTextInput) {
         // Add the listener here inside the safe block
         othersTextInput.addEventListener('input', updateSummary);
