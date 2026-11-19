@@ -1833,7 +1833,7 @@ function sendWhatsApp() {
             `*${t('adultsLabel')}* ${data.adultCount}\n` +
             `*${t('kidsLabel')}* ${data.kidCount}\n` +
             `*${t('toddlersLabel')}* ${data.toddlerCount}\n` +
-            `*${t('selectedMenuLabel')}* ${data.courseCountLabel} (${data.menuPriceDisplay})\n\n` +
+            `*${t('selectedMenuLabel')}* ${data.courseCountLabel}\n\n` +
             `${t('myChoices')}\n${data.formattedItems}`;
 
         const encodedMessage = encodeURIComponent(message);

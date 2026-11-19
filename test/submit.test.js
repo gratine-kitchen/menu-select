@@ -187,12 +187,18 @@ test('sendEmail submits the expected template parameters', async () => {
 test('sendWhatsApp opens the wa.me link and sends a backup email', async () => {
     const window = await setupApp();
     fillForm(window);
+    const courseCountSelect = window.document.getElementById('course-count');
+    courseCountSelect.innerHTML = '<option value="6" selected>6 Course Menu - 3 starters ($638)</option>';
+    window.document.getElementById('menu-price-display').textContent = '$638';
 
     window.sendWhatsApp();
 
     assert.ok(window.__lastOpenUrl, 'window.open should have been called');
     assert.ok(window.__lastOpenUrl.startsWith(`https://wa.me/${WHATSAPP_NUMBER}?text=`), 'message should target the configured WhatsApp number');
-    assert.ok(decodeURIComponent(window.__lastOpenUrl).includes('Test User'), 'message should include the customer name');
+    const message = decodeURIComponent(window.__lastOpenUrl);
+    assert.ok(message.includes('Test User'), 'message should include the customer name');
+    assert.ok(message.includes('*Selected Menu:* 6 Course Menu - 3 starters ($638)'), 'selected menu label should include its price');
+    assert.equal(message.match(/\$638/g)?.length, 1, 'selected menu price should only appear once');
 
     await new Promise(resolve => setTimeout(resolve, 30));
     assert.ok(window.__lastEmail, 'backup email should be triggered');
